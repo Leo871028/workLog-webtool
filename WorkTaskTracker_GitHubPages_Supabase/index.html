@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Work Task Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <section id="loginView" class="login-shell">
+    <div class="login-card">
+      <h1>Work Task Tracker</h1>
+      <p>Sign in to access your synchronized work data.</p>
+      <label>Email<input id="loginEmail" type="email"></label>
+      <label>Password<input id="loginPassword" type="password"></label>
+      <div class="actions"><button id="loginBtn" class="btn primary">Sign In</button><button id="signupBtn" class="btn secondary">Create Account</button></div>
+      <div id="loginMessage" class="message"></div>
+    </div>
+  </section>
+
+  <div id="appView" class="app hidden">
+    <header><div><h1>Work Task Tracker</h1><p>GitHub Pages + Supabase sync</p></div><div class="actions"><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
+    <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button></nav>
+    <main>
+      <section id="tasks" class="page active">
+        <section class="card">
+          <h2>New Task</h2>
+          <div class="form-grid">
+            <label>Title<input id="taskTitle" type="text"></label>
+            <label>Priority<select id="taskPriority"><option>Low</option><option selected>Medium</option><option>High</option></select></label>
+            <button id="addTaskBtn" class="btn primary">Add Task</button>
+          </div>
+          <label>Description<textarea id="taskDesc" rows="3"></textarea></label>
+        </section>
+        <section class="board">
+          <div class="panel"><h3 class="todo">Todo</h3><div id="todoList" class="task-list"></div></div>
+          <div class="panel"><h3 class="ongoing">Ongoing</h3><div id="ongoingList" class="task-list"></div></div>
+          <div class="panel"><h3 class="done">Done</h3><div id="doneList" class="task-list"></div></div>
+        </section>
+      </section>
+      <section id="daily-log" class="page">
+        <section class="card log-toolbar"><h2>Daily Work Log</h2><div class="actions"><button id="prevDayBtn" class="btn secondary">Prev Day</button><button id="todayBtn" class="btn secondary">Today</button><button id="nextDayBtn" class="btn secondary">Next Day</button><label>Date<input id="logDate" type="date"></label><button id="saveLogBtn" class="btn success">Save Log</button></div></section>
+        <section class="log-grid">
+          <label class="log-card">Completed Today<textarea id="completed" rows="10"></textarea></label>
+          <label class="log-card">Ongoing / In Progress<textarea id="ongoing" rows="10"></textarea></label>
+          <label class="log-card">Blockers / Issues<textarea id="blockers" rows="10"></textarea></label>
+          <label class="log-card">Next Plan<textarea id="nextPlan" rows="10"></textarea></label>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="editModal" class="modal hidden"><div class="modal-card"><div class="modal-header"><h2>Edit Task</h2><button id="closeEditModalBtn" class="icon-btn">×</button></div><input id="editTaskId" type="hidden"><label>Title<input id="editTaskTitle" type="text"></label><label>Priority<select id="editTaskPriority"><option>Low</option><option>Medium</option><option>High</option></select></label><label>Description<textarea id="editTaskDesc" rows="6"></textarea></label><div class="actions end"><button id="cancelEditTaskBtn" class="btn secondary">Cancel</button><button id="saveEditTaskBtn" class="btn success">Save Changes</button></div></div></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
