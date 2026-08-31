@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Work Task Tracker</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260831-1">
-  <link rel="stylesheet" href="style.css?v=20260831-18">
+  <link rel="stylesheet" href="style.css?v=20260831-19">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -21,7 +21,7 @@
   </section>
 
   <div id="appView" class="app hidden">
-    <header><div class="app-title"><img class="app-title-icon" src="favicon.svg?v=20260831-1" alt=""><h1>Work Task Tracker</h1></div><div class="actions"><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
+    <header><div class="app-title"><img class="app-title-icon" src="favicon.svg?v=20260831-1" alt=""><h1>Work Task Tracker</h1></div><div class="actions"><button id="dinoToggle" class="dino-toggle active" type="button" aria-pressed="true" title="Toggle dinosaur"><span>Dino On</span></button><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
     <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button></nav>
     <main>
       <section id="tasks" class="page active">
@@ -59,9 +59,11 @@
     </main>
   </div>
 
+  <div id="dinoTrack" class="dino-track" aria-hidden="true"><div id="dinoRunner" class="dino-runner"><div class="dino-pixel">🦖</div><div class="dino-shadow"></div></div></div>
   <div id="editModal" class="modal hidden"><div class="modal-card"><div class="modal-header"><h2>Edit Task</h2><button id="closeEditModalBtn" class="icon-btn">×</button></div><input id="editTaskId" type="hidden"><label>Title<input id="editTaskTitle" type="text"></label><label>Priority<select id="editTaskPriority"><option>Low</option><option>Medium</option><option>High</option></select></label><label>Deadline<input id="editTaskDeadline" type="date"></label><label>Description<textarea id="editTaskDesc" rows="6"></textarea></label><div class="actions end"><button id="cancelEditTaskBtn" class="btn secondary">Cancel</button><button id="saveEditTaskBtn" class="btn success">Save Changes</button></div></div></div>
 
   <script src="config.js"></script>
   <script src="app.js?v=20260831-9"></script>
+  <script src="dino.js?v=20260831-1"></script>
 </body>
 </html>
