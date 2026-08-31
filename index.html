@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Work Task Tracker</title>
-  <link rel="stylesheet" href="style.css?v=20260831-12">
+  <link rel="stylesheet" href="style.css?v=20260831-13">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -20,11 +20,11 @@
   </section>
 
   <div id="appView" class="app hidden">
-    <header><div><h1>Work Task Tracker</h1><p>GitHub Pages + Supabase sync</p></div><div class="actions"><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
+    <header><div class="app-title"><h1>Work Task Tracker</h1></div><div class="actions"><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
     <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button></nav>
     <main>
       <section id="tasks" class="page active">
-        <section class="card">
+        <section class="card new-task-card">
           <h2>New Task</h2>
           <div class="form-grid">
             <label>Title<input id="taskTitle" type="text"></label>
