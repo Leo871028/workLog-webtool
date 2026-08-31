@@ -41,7 +41,7 @@
         </section>
       </section>
       <section id="daily-log" class="page">
-        <section class="card log-toolbar"><h2>Daily Work Log</h2><div class="actions"><button id="prevDayBtn" class="btn secondary">Prev Day</button><button id="todayBtn" class="btn secondary">Today</button><button id="nextDayBtn" class="btn secondary">Next Day</button><label>Date<input id="logDate" type="date"></label><span id="saveStatus" class="save-status saved">Saved</span><button id="saveLogBtn" class="btn success">Save Log</button></div></section>
+        <section class="card log-toolbar"><h2>Daily Work Log</h2><div class="actions"><button id="prevDayBtn" class="btn secondary">Prev Day</button><button id="todayBtn" class="btn secondary">Today</button><button id="nextDayBtn" class="btn secondary">Next Day</button><label>Date<input id="logDate" type="date"></label><span id="saveStatus" class="save-status hidden"></span><button id="saveLogBtn" class="btn success">Save Log</button></div></section>
         <section class="log-grid">
           <label class="log-card">Completed Today<textarea id="completed" rows="10"></textarea></label>
           <label class="log-card">Ongoing / In Progress<textarea id="ongoing" rows="10"></textarea></label>
@@ -55,6 +55,6 @@
   <div id="editModal" class="modal hidden"><div class="modal-card"><div class="modal-header"><h2>Edit Task</h2><button id="closeEditModalBtn" class="icon-btn">×</button></div><input id="editTaskId" type="hidden"><label>Title<input id="editTaskTitle" type="text"></label><label>Priority<select id="editTaskPriority"><option>Low</option><option>Medium</option><option>High</option></select></label><label>Deadline<input id="editTaskDeadline" type="date"></label><label>Description<textarea id="editTaskDesc" rows="6"></textarea></label><div class="actions end"><button id="cancelEditTaskBtn" class="btn secondary">Cancel</button><button id="saveEditTaskBtn" class="btn success">Save Changes</button></div></div></div>
 
   <script src="config.js"></script>
-  <script src="app.js?v=20260831-8"></script>
+  <script src="app.js?v=20260831-9"></script>
 </body>
 </html>
