@@ -7,9 +7,12 @@ create table if not exists public.tasks (
   description text not null default '',
   priority text not null default 'Medium' check (priority in ('Low','Medium','High')),
   status text not null default 'Todo' check (status in ('Todo','Ongoing','Done')),
+  deadline date,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.tasks add column if not exists deadline date;
 
 create table if not exists public.daily_logs (
   id uuid primary key default gen_random_uuid(),
