@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Work Task Tracker</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260831-1">
-  <link rel="stylesheet" href="style.css?v=20260831-19">
+  <link rel="stylesheet" href="style.css?v=20260831-20">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -21,7 +21,7 @@
   </section>
 
   <div id="appView" class="app hidden">
-    <header><div class="app-title"><img class="app-title-icon" src="favicon.svg?v=20260831-1" alt=""><h1>Work Task Tracker</h1></div><div class="actions"><button id="dinoToggle" class="dino-toggle active" type="button" aria-pressed="true" title="Toggle dinosaur"><span>Dino On</span></button><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
+    <header><div class="app-title"><img class="app-title-icon" src="favicon.svg?v=20260831-1" alt=""><h1>Work Task Tracker</h1></div><div class="actions"><div class="animal-control"><select id="animalPicker" class="animal-picker" aria-label="Choose runner animal"><option value="dino">🦖 Dino</option><option value="cat">🐈 Cat</option><option value="dog">🐕 Dog</option><option value="rabbit">🐇 Rabbit</option><option value="fox">🦊 Fox</option><option value="turtle">🐢 Turtle</option></select><button id="dinoToggle" class="dino-toggle active" type="button" aria-pressed="true" title="Toggle runner"><span>Dino On</span></button></div><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
     <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button></nav>
     <main>
       <section id="tasks" class="page active">
@@ -64,6 +64,6 @@
 
   <script src="config.js"></script>
   <script src="app.js?v=20260831-9"></script>
-  <script src="dino.js?v=20260831-2"></script>
+  <script src="dino.js?v=20260831-3"></script>
 </body>
 </html>
