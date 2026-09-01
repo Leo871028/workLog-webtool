@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Work Task Tracker</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260831-1">
-  <link rel="stylesheet" href="style.css?v=20260831-21">
+  <link rel="stylesheet" href="style.css?v=20260901-1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -49,6 +49,14 @@
             <div class="log-save-group"><label>Date<input id="logDate" type="date"></label><div class="save-button-wrap"><button id="saveLogBtn" class="btn success">Save Log</button><span id="saveStatus" class="save-status hidden"></span></div></div>
           </div>
         </section>
+        <section class="card log-export-card">
+          <div class="log-export-heading"><div><h2>Export Daily Work Log</h2><p>Export saved logs within a selected date range as CSV.</p></div></div>
+          <div class="log-export-controls">
+            <label>From<input id="exportStartDate" type="date"></label>
+            <label>To<input id="exportEndDate" type="date"></label>
+            <button id="exportLogsBtn" class="btn primary" type="button">Export CSV</button>
+          </div>
+        </section>
         <section class="log-grid">
           <label class="log-card">Completed Today<textarea id="completed" rows="10"></textarea></label>
           <label class="log-card">Ongoing / In Progress<textarea id="ongoing" rows="10"></textarea></label>
@@ -63,7 +71,7 @@
   <div id="editModal" class="modal hidden"><div class="modal-card"><div class="modal-header"><h2>Edit Task</h2><button id="closeEditModalBtn" class="icon-btn">×</button></div><input id="editTaskId" type="hidden"><label>Title<input id="editTaskTitle" type="text"></label><label>Priority<select id="editTaskPriority"><option>Low</option><option>Medium</option><option>High</option></select></label><label>Deadline<input id="editTaskDeadline" type="date"></label><label>Description<textarea id="editTaskDesc" rows="6"></textarea></label><div class="actions end"><button id="cancelEditTaskBtn" class="btn secondary">Cancel</button><button id="saveEditTaskBtn" class="btn success">Save Changes</button></div></div></div>
 
   <script src="config.js"></script>
-  <script src="app.js?v=20260831-9"></script>
+  <script src="app.js?v=20260901-1"></script>
   <script src="dino.js?v=20260831-4"></script>
 </body>
 </html>
