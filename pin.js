@@ -89,20 +89,33 @@ function decorateUpcomingDeadlinePins(){
   const items=[...upcomingDeadlines.querySelectorAll(".upcoming-item")];
   items.forEach((item,index)=>{
     const task=upcoming[index];
-    if(!task?.pinned)return;
-    const title=item.querySelector("strong");
-    if(title&&!title.querySelector(".dashboard-pin-mark")){
-      const mark=document.createElement("span");
-      mark.className="dashboard-pin-mark";
-      mark.textContent="📌";
-      mark.title="Pinned task";
-      title.prepend(mark);
+    if(!task)return;
+    item.dataset.taskId=task.id;
+    item.tabIndex=0;
+    item.setAttribute("role","button");
+    item.setAttribute("aria-label",`Open task ${task.title||""}`);
+    item.onclick=()=>openEditTask(task.id);
+    item.onkeydown=e=>{
+      if(e.key==="Enter"||e.key===" "){
+        e.preventDefault();
+        openEditTask(task.id);
+      }
+    };
+    if(task.pinned){
+      const title=item.querySelector("strong");
+      if(title&&!title.querySelector(".dashboard-pin-mark")){
+        const mark=document.createElement("span");
+        mark.className="dashboard-pin-mark";
+        mark.textContent="📌";
+        mark.title="Pinned task";
+        title.prepend(mark);
+      }
     }
   });
 }
 
 const pinStyle=document.createElement("style");
-pinStyle.textContent=`.task-card.task-pinned{box-shadow:0 0 0 1px rgba(240,189,123,.34),0 8px 18px rgba(0,0,0,.14)}.task-card.task-pinned .task-title{display:flex;align-items:flex-start;gap:7px}.pin-mark{flex:0 0 auto;font-size:14px;line-height:1.25}.pin-btn{min-width:58px}.dashboard-pin-mark{display:inline-block;margin-right:7px;font-size:13px;vertical-align:1px}`;
+pinStyle.textContent=`.task-card.task-pinned{box-shadow:0 0 0 1px rgba(240,189,123,.34),0 8px 18px rgba(0,0,0,.14)}.task-card.task-pinned .task-title{display:flex;align-items:flex-start;gap:7px}.pin-mark{flex:0 0 auto;font-size:14px;line-height:1.25}.pin-btn{min-width:58px}.dashboard-pin-mark{display:inline-block;margin-right:7px;font-size:13px;vertical-align:1px}.upcoming-item[data-task-id]{cursor:pointer;transition:border-color .15s ease,background .15s ease,transform .15s ease}.upcoming-item[data-task-id]:hover{background:#26394d;border-color:#55718d;transform:translateY(-1px)}.upcoming-item[data-task-id]:focus-visible{outline:2px solid #7fb5ef;outline-offset:2px}`;
 document.head.appendChild(pinStyle);
 
 const pinBaseRenderTasks=renderTasks;
