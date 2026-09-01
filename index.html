@@ -22,7 +22,7 @@
 
   <div id="appView" class="app hidden">
     <header><div class="app-title"><img class="app-title-icon" src="favicon.svg?v=20260831-1" alt=""><h1>Work Task Tracker</h1></div><div class="actions"><div class="animal-control"><select id="animalPicker" class="animal-picker" aria-label="Choose runner animal"><option value="dino">🦖 Dino</option><option value="cat">🐈 Cat</option><option value="dog">🐕 Dog</option><option value="rabbit">🐇 Rabbit</option><option value="fox">🦊 Fox</option><option value="turtle">🐢 Turtle</option></select><button id="dinoToggle" class="dino-toggle active" type="button" aria-pressed="true" title="Toggle runner"><span>Dino On</span></button></div><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
-    <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button></nav>
+    <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button><button class="tab" data-tab="export-log">Export</button></nav>
     <main>
       <section id="tasks" class="page active">
         <section class="card new-task-card">
@@ -49,6 +49,14 @@
             <div class="log-save-group"><label>Date<input id="logDate" type="date"></label><div class="save-button-wrap"><button id="saveLogBtn" class="btn success">Save Log</button><span id="saveStatus" class="save-status hidden"></span></div></div>
           </div>
         </section>
+        <section class="log-grid">
+          <label class="log-card">Completed Today<textarea id="completed" rows="10"></textarea></label>
+          <label class="log-card">Ongoing / In Progress<textarea id="ongoing" rows="10"></textarea></label>
+          <label class="log-card">Blockers / Issues<textarea id="blockers" rows="10"></textarea></label>
+          <label class="log-card">Next Plan<textarea id="nextPlan" rows="10"></textarea></label>
+        </section>
+      </section>
+      <section id="export-log" class="page">
         <section class="card log-export-card">
           <div class="log-export-heading"><div><h2>Export Daily Work Log</h2><p>Export saved logs within a selected date range as CSV.</p></div></div>
           <div class="log-export-controls">
@@ -56,12 +64,6 @@
             <label>To<input id="exportEndDate" type="date"></label>
             <button id="exportLogsBtn" class="btn primary" type="button">Export CSV</button>
           </div>
-        </section>
-        <section class="log-grid">
-          <label class="log-card">Completed Today<textarea id="completed" rows="10"></textarea></label>
-          <label class="log-card">Ongoing / In Progress<textarea id="ongoing" rows="10"></textarea></label>
-          <label class="log-card">Blockers / Issues<textarea id="blockers" rows="10"></textarea></label>
-          <label class="log-card">Next Plan<textarea id="nextPlan" rows="10"></textarea></label>
         </section>
       </section>
     </main>
