@@ -10,6 +10,8 @@ create table if not exists public.tasks (
   deadline date,
   archived boolean not null default false,
   archived_at timestamptz,
+  pinned boolean not null default false,
+  pinned_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -17,7 +19,10 @@ create table if not exists public.tasks (
 alter table public.tasks add column if not exists deadline date;
 alter table public.tasks add column if not exists archived boolean not null default false;
 alter table public.tasks add column if not exists archived_at timestamptz;
+alter table public.tasks add column if not exists pinned boolean not null default false;
+alter table public.tasks add column if not exists pinned_at timestamptz;
 create index if not exists tasks_user_archived_idx on public.tasks (user_id, archived);
+create index if not exists tasks_user_pin_idx on public.tasks (user_id, pinned, pinned_at desc);
 
 create table if not exists public.daily_logs (
   id uuid primary key default gen_random_uuid(),
