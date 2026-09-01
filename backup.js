@@ -20,6 +20,8 @@ function safeTaskForBackup(t){
     priority:["Low","Medium","High"].includes(t.priority)?t.priority:"Medium",
     status:["Todo","Ongoing","Done"].includes(t.status)?t.status:"Todo",
     deadline:t.deadline||null,
+    archived:Boolean(t.archived),
+    archived_at:t.archived_at||null,
     created_at:t.created_at||null,
     updated_at:t.updated_at||null
   };
@@ -81,6 +83,7 @@ function validateBackup(data){
     if(!["Low","Medium","High"].includes(t.priority))throw new Error(`Invalid task priority at item ${i+1}.`);
     if(!["Todo","Ongoing","Done"].includes(t.status))throw new Error(`Invalid task status at item ${i+1}.`);
     if(t.deadline!=null&&t.deadline!==""&&!validDateString(t.deadline))throw new Error(`Invalid task deadline at item ${i+1}.`);
+    if(t.archived!=null&&typeof t.archived!=="boolean")throw new Error(`Invalid archive flag at task ${i+1}.`);
   });
   data.daily_logs.forEach((r,i)=>{
     if(!r||typeof r!=="object"||!validDateString(r.log_date))throw new Error(`Invalid Daily Work Log at item ${i+1}.`);
@@ -96,6 +99,8 @@ function taskRestoreRow(t){
     priority:t.priority,
     status:t.status,
     deadline:t.deadline||null,
+    archived:Boolean(t.archived),
+    archived_at:t.archived? (t.archived_at||new Date().toISOString()) : null,
     updated_at:t.updated_at||new Date().toISOString()
   };
   if(validUuid(t.id))row.id=t.id;
