@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="style.css?v=20260901-1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    .dashboard{display:grid;gap:14px;margin-bottom:18px}.dashboard-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.dashboard-card{padding:16px 18px;border:1px solid #3b5064;border-radius:16px;background:linear-gradient(180deg,#213346 0%,#1b2a39 100%);box-shadow:0 7px 18px rgba(0,0,0,.12)}.dashboard-label{display:block;color:#9fb0c0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.dashboard-value{display:block;margin-top:7px;color:#f4f7fb;font-size:29px;font-weight:800;line-height:1}.dashboard-card.overdue .dashboard-value{color:#f4939a}.dashboard-card.due-soon .dashboard-value{color:#f0bd7b}.dashboard-card.ongoing .dashboard-value{color:#94c5ff}.dashboard-deadlines{padding:16px 18px;border:1px solid #3b5064;border-radius:16px;background:#1b2a39}.dashboard-deadlines h3{margin:0 0 10px;font-size:15px;color:#e9f0f6}.upcoming-list{display:grid;gap:7px}.upcoming-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 11px;border-radius:12px;background:#213244;border:1px solid rgba(67,90,112,.58)}.upcoming-item>div{display:grid;gap:3px;min-width:0}.upcoming-item strong{overflow-wrap:anywhere;color:#edf3f8}.upcoming-item span{font-size:12px;color:#9fb0c0}.upcoming-date{white-space:nowrap;font-weight:800!important;color:#b9c7d4!important}.upcoming-date.due-soon{color:#f0bd7b!important}.upcoming-date.overdue{color:#f4939a!important}.dashboard-empty{padding:10px;color:#899bab;font-size:13px}.task-filter-card{margin-bottom:18px;padding:16px 18px}.task-filter-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.task-filter-header h2{margin:0;font-size:17px}.task-filter-count{font-size:12px;color:#9fb0c0;font-weight:700}.task-filter-grid{display:grid;grid-template-columns:minmax(220px,1.8fr) repeat(3,minmax(130px,.7fr)) auto;gap:10px;align-items:end}.task-filter-grid label{font-size:12px}.task-filter-grid .btn{white-space:nowrap}@media(max-width:900px){.dashboard-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.task-filter-grid{grid-template-columns:1fr 1fr}.task-filter-grid label:first-child{grid-column:1/-1}.task-filter-grid .btn{width:100%}.upcoming-item{align-items:flex-start;flex-direction:column}.upcoming-date{white-space:normal}}@media(max-width:560px){.dashboard-summary{grid-template-columns:1fr 1fr}.task-filter-grid{grid-template-columns:1fr}.task-filter-grid label:first-child{grid-column:auto}}
+  </style>
 </head>
 <body>
   <section id="loginView" class="login-shell">
@@ -26,6 +29,30 @@
     <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button><button class="tab" data-tab="export-log">Export</button></nav>
     <main>
       <section id="tasks" class="page active">
+        <section class="dashboard" aria-label="Task dashboard">
+          <div class="dashboard-summary">
+            <div class="dashboard-card"><span class="dashboard-label">Open Tasks</span><strong id="dashboardTotal" class="dashboard-value">0</strong></div>
+            <div class="dashboard-card ongoing"><span class="dashboard-label">Ongoing</span><strong id="dashboardOngoing" class="dashboard-value">0</strong></div>
+            <div class="dashboard-card overdue"><span class="dashboard-label">Overdue</span><strong id="dashboardOverdue" class="dashboard-value">0</strong></div>
+            <div class="dashboard-card due-soon"><span class="dashboard-label">Due Soon</span><strong id="dashboardDueSoon" class="dashboard-value">0</strong></div>
+          </div>
+          <div class="dashboard-deadlines">
+            <h3>Upcoming Deadlines</h3>
+            <div id="upcomingDeadlines" class="upcoming-list"></div>
+          </div>
+        </section>
+
+        <section class="card task-filter-card">
+          <div class="task-filter-header"><h2>Search & Filter</h2><span id="taskFilterCount" class="task-filter-count">Showing 0 tasks</span></div>
+          <div class="task-filter-grid">
+            <label>Search<input id="taskSearch" type="search" placeholder="Search title or description..."></label>
+            <label>Status<select id="taskStatusFilter"><option value="all">All</option><option>Todo</option><option>Ongoing</option><option>Done</option></select></label>
+            <label>Priority<select id="taskPriorityFilter"><option value="all">All</option><option>High</option><option>Medium</option><option>Low</option></select></label>
+            <label>Deadline<select id="taskDeadlineFilter"><option value="all">All</option><option value="overdue">Overdue</option><option value="today">Due Today</option><option value="soon">Due Soon (0-3 days)</option><option value="none">No Deadline</option></select></label>
+            <button id="clearTaskFiltersBtn" class="btn secondary" type="button">Clear Filters</button>
+          </div>
+        </section>
+
         <section class="card new-task-card">
           <h2>New Task</h2>
           <div class="form-grid">
@@ -75,7 +102,7 @@
   <div id="editModal" class="modal hidden"><div class="modal-card"><div class="modal-header"><h2>Edit Task</h2><button id="closeEditModalBtn" class="icon-btn">×</button></div><input id="editTaskId" type="hidden"><label>Title<input id="editTaskTitle" type="text"></label><label>Priority<select id="editTaskPriority"><option>Low</option><option>Medium</option><option>High</option></select></label><label>Deadline<input id="editTaskDeadline" type="date"></label><label>Description<textarea id="editTaskDesc" rows="6"></textarea></label><div class="actions end"><button id="cancelEditTaskBtn" class="btn secondary">Cancel</button><button id="saveEditTaskBtn" class="btn success">Save Changes</button></div></div></div>
 
   <script src="config.js"></script>
-  <script src="app.js?v=20260901-2"></script>
+  <script src="app.js?v=20260901-3"></script>
   <script src="dino.js?v=20260831-4"></script>
 </body>
 </html>
