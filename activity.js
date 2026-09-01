@@ -8,31 +8,12 @@ function activityTime(value){
 }
 function activityLabel(type){
   return ({
-    created:"Task created",
-    status_changed:"Status changed",
-    priority_changed:"Priority changed",
-    deadline_changed:"Deadline changed",
-    title_changed:"Title changed",
-    description_changed:"Description updated",
-    archived:"Task archived",
-    restored:"Task restored",
-    deleted:"Task deleted"
+    created:"Task created",status_changed:"Status changed",priority_changed:"Priority changed",deadline_changed:"Deadline changed",title_changed:"Title changed",description_changed:"Description updated",archived:"Task archived",restored:"Task restored",deleted:"Task deleted"
   })[type]||String(type||"Activity").replaceAll("_"," ");
 }
-function activityClass(type){
-  if(type==="created"||type==="restored")return "positive";
-  if(type==="deleted"||type==="archived")return "danger";
-  if(type==="status_changed")return "status";
-  return "neutral";
-}
+function activityClass(type){if(type==="created"||type==="restored")return "positive";if(type==="deleted"||type==="archived")return "danger";if(type==="status_changed")return "status";return "neutral"}
 function activityChangeText(row){
-  if(row.event_type==="created"){
-    const parts=[];
-    if(row.details?.status)parts.push(`Status: ${row.details.status}`);
-    if(row.details?.priority)parts.push(`Priority: ${row.details.priority}`);
-    if(row.details?.deadline)parts.push(`Deadline: ${row.details.deadline}`);
-    return parts.join(" · ")||"Task created";
-  }
+  if(row.event_type==="created"){const parts=[];if(row.details?.status)parts.push(`Status: ${row.details.status}`);if(row.details?.priority)parts.push(`Priority: ${row.details.priority}`);if(row.details?.deadline)parts.push(`Deadline: ${row.details.deadline}`);return parts.join(" · ")||"Task created"}
   if(row.event_type==="description_changed")return "Description content was updated.";
   if(row.event_type==="deleted")return `Deleted from ${row.old_value||"task list"}.`;
   if(row.event_type==="archived")return "Moved from Done to Archived Tasks.";
@@ -40,204 +21,43 @@ function activityChangeText(row){
   if(row.old_value!=null||row.new_value!=null)return `${row.old_value||"None"} → ${row.new_value||"None"}`;
   return "";
 }
-function activityItem(row){
-  return `<article class="activity-item"><div class="activity-dot ${activityClass(row.event_type)}"></div><div class="activity-body"><div class="activity-top"><strong>${activityEsc(activityLabel(row.event_type))}</strong><time>${activityEsc(activityTime(row.created_at))}</time></div><div class="activity-task">${activityEsc(row.task_title||"Untitled Task")}</div>${activityChangeText(row)?`<div class="activity-change">${activityEsc(activityChangeText(row))}</div>`:""}</div></article>`;
-}
-
-function filteredActivityRows(rows){
-  const q=(activitySearch?.value||"").trim().toLowerCase();
-  const type=activityTypeFilter?.value||"all";
-  return rows.filter(row=>{
-    const text=`${row.task_title||""} ${activityLabel(row.event_type)} ${row.old_value||""} ${row.new_value||""}`.toLowerCase();
-    return(!q||text.includes(q))&&(type==="all"||row.event_type===type);
-  });
-}
-function renderActivityHistory(){
-  if(typeof activityList==="undefined")return;
-  const rows=filteredActivityRows(activityRows);
-  activityCount.textContent=`${rows.length} event${rows.length===1?"":"s"}`;
-  activityList.innerHTML=rows.length?rows.map(activityItem).join(""):`<div class="activity-empty">No activity found.</div>`;
-}
-async function loadActivityHistory(){
-  if(!currentUser||typeof activityList==="undefined")return;
-  activityList.innerHTML=`<div class="activity-empty">Loading activity...</div>`;
-  let query=db.from("task_activity").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(500);
-  const{data,error}=await query;
-  if(error){
-    activityList.innerHTML=`<div class="activity-empty">Activity History is not ready yet. Run migration_add_task_activity.sql in Supabase.</div>`;
-    activityCount.textContent="";
-    return;
-  }
-  activityRows=data||[];
-  renderActivityHistory();
-}
-
-async function openTaskHistory(taskId,title){
-  if(!currentUser)return;
-  taskHistoryTitle.textContent=title?`History · ${title}`:"Task History";
-  taskHistoryList.innerHTML=`<div class="activity-empty">Loading activity...</div>`;
-  taskHistoryModal.classList.remove("hidden");
-  const{data,error}=await db.from("task_activity").select("*").eq("user_id",currentUser.id).eq("task_id",taskId).order("created_at",{ascending:false}).limit(200);
-  if(error){
-    taskHistoryList.innerHTML=`<div class="activity-empty">Unable to load history. Run migration_add_task_activity.sql in Supabase.</div>`;
-    return;
-  }
-  const rows=data||[];
-  taskHistoryList.innerHTML=rows.length?rows.map(activityItem).join(""):`<div class="activity-empty">No history is available for this task yet.</div>`;
-}
+function activityItem(row){return `<article class="activity-item"><div class="activity-dot ${activityClass(row.event_type)}"></div><div class="activity-body"><div class="activity-top"><strong>${activityEsc(activityLabel(row.event_type))}</strong><time>${activityEsc(activityTime(row.created_at))}</time></div><div class="activity-task">${activityEsc(row.task_title||"Untitled Task")}</div>${activityChangeText(row)?`<div class="activity-change">${activityEsc(activityChangeText(row))}</div>`:""}</div></article>`}
+function filteredActivityRows(rows){const q=(activitySearch?.value||"").trim().toLowerCase();const type=activityTypeFilter?.value||"all";return rows.filter(row=>{const text=`${row.task_title||""} ${activityLabel(row.event_type)} ${row.old_value||""} ${row.new_value||""}`.toLowerCase();return(!q||text.includes(q))&&(type==="all"||row.event_type===type)})}
+function renderActivityHistory(){if(typeof activityList==="undefined")return;const rows=filteredActivityRows(activityRows);activityCount.textContent=`${rows.length} event${rows.length===1?"":"s"}`;activityList.innerHTML=rows.length?rows.map(activityItem).join(""):`<div class="activity-empty">No activity found.</div>`}
+async function loadActivityHistory(){if(!currentUser||typeof activityList==="undefined")return;activityList.innerHTML=`<div class="activity-empty">Loading activity...</div>`;const{data,error}=await db.from("task_activity").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(500);if(error){activityList.innerHTML=`<div class="activity-empty">Activity History is not ready yet. Run migration_add_task_activity.sql in Supabase.</div>`;activityCount.textContent="";return}activityRows=data||[];renderActivityHistory()}
+async function openTaskHistory(taskId,title){if(!currentUser)return;taskHistoryTitle.textContent=title?`History · ${title}`:"Task History";taskHistoryList.innerHTML=`<div class="activity-empty">Loading activity...</div>`;taskHistoryModal.classList.remove("hidden");const{data,error}=await db.from("task_activity").select("*").eq("user_id",currentUser.id).eq("task_id",taskId).order("created_at",{ascending:false}).limit(200);if(error){taskHistoryList.innerHTML=`<div class="activity-empty">Unable to load history. Run migration_add_task_activity.sql in Supabase.</div>`;return}const rows=data||[];taskHistoryList.innerHTML=rows.length?rows.map(activityItem).join(""):`<div class="activity-empty">No history is available for this task yet.</div>`}
 function closeTaskHistory(){taskHistoryModal.classList.add("hidden")}
-
-function attachTaskHistoryButtons(){
-  document.querySelectorAll(".task-card").forEach(card=>{
-    const edit=card.querySelector("[data-edit]");
-    if(!edit||card.querySelector("[data-history]"))return;
-    const task=tasks.find(t=>String(t.id)===String(edit.dataset.edit));
-    if(!task)return;
-    const btn=document.createElement("button");
-    btn.className="btn secondary";
-    btn.type="button";
-    btn.dataset.history=task.id;
-    btn.textContent="History";
-    btn.onclick=()=>openTaskHistory(task.id,task.title);
-    card.querySelector(".task-actions")?.insertBefore(btn,edit);
-  });
-}
-function attachArchivedHistoryButtons(){
-  document.querySelectorAll(".archive-item").forEach(card=>{
-    const edit=card.querySelector("[data-archive-edit]");
-    if(!edit||card.querySelector("[data-history]"))return;
-    const task=tasks.find(t=>String(t.id)===String(edit.dataset.archiveEdit));
-    if(!task)return;
-    const btn=document.createElement("button");
-    btn.className="btn secondary";
-    btn.type="button";
-    btn.dataset.history=task.id;
-    btn.textContent="History";
-    btn.onclick=()=>openTaskHistory(task.id,task.title);
-    card.querySelector(".archive-item-actions")?.insertBefore(btn,edit);
-  });
-}
-
+function attachTaskHistoryButtons(){document.querySelectorAll(".task-card").forEach(card=>{const edit=card.querySelector("[data-edit]");if(!edit||card.querySelector("[data-history]"))return;const task=tasks.find(t=>String(t.id)===String(edit.dataset.edit));if(!task)return;const btn=document.createElement("button");btn.className="btn secondary";btn.type="button";btn.dataset.history=task.id;btn.textContent="History";btn.onclick=()=>openTaskHistory(task.id,task.title);card.querySelector(".task-actions")?.insertBefore(btn,edit)})}
+function attachArchivedHistoryButtons(){document.querySelectorAll(".archive-item").forEach(card=>{const edit=card.querySelector("[data-archive-edit]");if(!edit||card.querySelector("[data-history]"))return;const task=tasks.find(t=>String(t.id)===String(edit.dataset.archiveEdit));if(!task)return;const btn=document.createElement("button");btn.className="btn secondary";btn.type="button";btn.dataset.history=task.id;btn.textContent="History";btn.onclick=()=>openTaskHistory(task.id,task.title);card.querySelector(".archive-item-actions")?.insertBefore(btn,edit)})}
 function installActivityUi(){
   if(document.getElementById("activity-history"))return;
-  const style=document.createElement("style");
-  style.textContent=`.activity-toolbar{display:flex;align-items:end;justify-content:space-between;gap:14px;margin-bottom:16px}.activity-toolbar-main{display:grid;grid-template-columns:minmax(230px,1fr) 190px;gap:10px;flex:1}.activity-count{white-space:nowrap;color:#9fb0c0;font-size:12px;font-weight:800;padding-bottom:12px}.activity-list{display:grid;gap:0}.activity-item{position:relative;display:grid;grid-template-columns:18px minmax(0,1fr);gap:12px;padding:0 0 20px}.activity-item:not(:last-child)::before{content:"";position:absolute;left:8px;top:18px;bottom:0;width:2px;background:#344b61}.activity-dot{position:relative;z-index:1;width:18px;height:18px;border-radius:50%;margin-top:2px;background:#60758b;border:4px solid #1b2a39;box-shadow:0 0 0 1px #536b82}.activity-dot.positive{background:#61b886}.activity-dot.danger{background:#d06b74}.activity-dot.status{background:#5d9fe8}.activity-body{min-width:0;padding:0 0 2px}.activity-top{display:flex;align-items:baseline;justify-content:space-between;gap:14px}.activity-top strong{color:#edf3f8}.activity-top time{color:#8498aa;font-size:12px;white-space:nowrap}.activity-task{margin-top:4px;color:#b9c7d4;font-size:13px;font-weight:700;overflow-wrap:anywhere}.activity-change{display:inline-flex;margin-top:7px;padding:5px 8px;border-radius:9px;background:#22364a;color:#aebdcb;font-size:12px;overflow-wrap:anywhere}.activity-empty{padding:28px;text-align:center;color:#899bab;border:1px dashed rgba(112,139,164,.3);border-radius:14px}.history-modal-card{width:min(760px,100%);max-height:min(82vh,760px);overflow:hidden;display:flex;flex-direction:column}.history-modal-card .activity-list{overflow:auto;padding-right:4px;margin-top:8px}@media(max-width:700px){.activity-toolbar{align-items:stretch;flex-direction:column}.activity-toolbar-main{grid-template-columns:1fr}.activity-count{padding:0}.activity-top{align-items:flex-start;flex-direction:column;gap:3px}.activity-top time{white-space:normal}}`;
-  document.head.appendChild(style);
-
-  const tab=document.createElement("button");
-  tab.className="tab";
-  tab.dataset.tab="activity-history";
-  tab.textContent="Activity History";
-  const exportTab=document.querySelector('.tab[data-tab="export-log"]');
-  exportTab?exportTab.before(tab):document.querySelector(".tabs")?.appendChild(tab);
-
-  const page=document.createElement("section");
-  page.id="activity-history";
-  page.className="page";
-  page.innerHTML=`<section class="card"><div class="activity-toolbar"><div class="activity-toolbar-main"><label>Search<input id="activitySearch" type="search" placeholder="Search task or activity..."></label><label>Activity Type<select id="activityTypeFilter"><option value="all">All Activities</option><option value="created">Created</option><option value="status_changed">Status Changed</option><option value="priority_changed">Priority Changed</option><option value="deadline_changed">Deadline Changed</option><option value="title_changed">Title Changed</option><option value="description_changed">Description Updated</option><option value="archived">Archived</option><option value="restored">Restored</option><option value="deleted">Deleted</option></select></label></div><span id="activityCount" class="activity-count"></span></div><div id="activityList" class="activity-list"></div></section>`;
-  document.querySelector("main")?.appendChild(page);
-
-  const modal=document.createElement("div");
-  modal.id="taskHistoryModal";
-  modal.className="modal hidden";
-  modal.innerHTML=`<div class="modal-card history-modal-card"><div class="modal-header"><h2 id="taskHistoryTitle">Task History</h2><button id="closeTaskHistoryBtn" class="icon-btn">×</button></div><div id="taskHistoryList" class="activity-list"></div></div>`;
-  document.body.appendChild(modal);
-
-  tab.onclick=()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
-    tab.classList.add("active");
-    page.classList.add("active");
-    loadActivityHistory();
-  };
-  activitySearch.addEventListener("input",renderActivityHistory);
-  activityTypeFilter.addEventListener("change",renderActivityHistory);
-  closeTaskHistoryBtn.onclick=closeTaskHistory;
-  taskHistoryModal.addEventListener("click",e=>{if(e.target===taskHistoryModal)closeTaskHistory()});
+  const style=document.createElement("style");style.textContent=`.activity-toolbar{display:flex;align-items:end;justify-content:space-between;gap:14px;margin-bottom:16px}.activity-toolbar-main{display:grid;grid-template-columns:minmax(230px,1fr) 190px;gap:10px;flex:1}.activity-count{white-space:nowrap;color:#9fb0c0;font-size:12px;font-weight:800;padding-bottom:12px}.activity-list{display:grid;gap:0}.activity-item{position:relative;display:grid;grid-template-columns:18px minmax(0,1fr);gap:12px;padding:0 0 20px}.activity-item:not(:last-child)::before{content:"";position:absolute;left:8px;top:18px;bottom:0;width:2px;background:#344b61}.activity-dot{position:relative;z-index:1;width:18px;height:18px;border-radius:50%;margin-top:2px;background:#60758b;border:4px solid #1b2a39;box-shadow:0 0 0 1px #536b82}.activity-dot.positive{background:#61b886}.activity-dot.danger{background:#d06b74}.activity-dot.status{background:#5d9fe8}.activity-body{min-width:0;padding:0 0 2px}.activity-top{display:flex;align-items:baseline;justify-content:space-between;gap:14px}.activity-top strong{color:#edf3f8}.activity-top time{color:#8498aa;font-size:12px;white-space:nowrap}.activity-task{margin-top:4px;color:#b9c7d4;font-size:13px;font-weight:700;overflow-wrap:anywhere}.activity-change{display:inline-flex;margin-top:7px;padding:5px 8px;border-radius:9px;background:#22364a;color:#aebdcb;font-size:12px;overflow-wrap:anywhere}.activity-empty{padding:28px;text-align:center;color:#899bab;border:1px dashed rgba(112,139,164,.3);border-radius:14px}.history-modal-card{width:min(760px,100%);max-height:min(82vh,760px);overflow:hidden;display:flex;flex-direction:column}.history-modal-card .activity-list{overflow:auto;padding-right:4px;margin-top:8px}@media(max-width:700px){.activity-toolbar{align-items:stretch;flex-direction:column}.activity-toolbar-main{grid-template-columns:1fr}.activity-count{padding:0}.activity-top{align-items:flex-start;flex-direction:column;gap:3px}.activity-top time{white-space:normal}}`;document.head.appendChild(style);
+  const tab=document.createElement("button");tab.className="tab";tab.dataset.tab="activity-history";tab.textContent="Activity History";const exportTab=document.querySelector('.tab[data-tab="export-log"]');exportTab?exportTab.before(tab):document.querySelector(".tabs")?.appendChild(tab);
+  const page=document.createElement("section");page.id="activity-history";page.className="page";page.innerHTML=`<section class="card"><div class="activity-toolbar"><div class="activity-toolbar-main"><label>Search<input id="activitySearch" type="search" placeholder="Search task or activity..."></label><label>Activity Type<select id="activityTypeFilter"><option value="all">All Activities</option><option value="created">Created</option><option value="status_changed">Status Changed</option><option value="priority_changed">Priority Changed</option><option value="deadline_changed">Deadline Changed</option><option value="title_changed">Title Changed</option><option value="description_changed">Description Updated</option><option value="archived">Archived</option><option value="restored">Restored</option><option value="deleted">Deleted</option></select></label></div><span id="activityCount" class="activity-count"></span></div><div id="activityList" class="activity-list"></div></section>`;document.querySelector("main")?.appendChild(page);
+  const modal=document.createElement("div");modal.id="taskHistoryModal";modal.className="modal hidden";modal.innerHTML=`<div class="modal-card history-modal-card"><div class="modal-header"><h2 id="taskHistoryTitle">Task History</h2><button id="closeTaskHistoryBtn" class="icon-btn">×</button></div><div id="taskHistoryList" class="activity-list"></div></div>`;document.body.appendChild(modal);
+  tab.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));tab.classList.add("active");page.classList.add("active");loadActivityHistory()};activitySearch.addEventListener("input",renderActivityHistory);activityTypeFilter.addEventListener("change",renderActivityHistory);closeTaskHistoryBtn.onclick=closeTaskHistory;taskHistoryModal.addEventListener("click",e=>{if(e.target===taskHistoryModal)closeTaskHistory()});
 }
-
 installActivityUi();
-
-const activityBaseRenderTasks=renderTasks;
-renderTasks=function(){activityBaseRenderTasks();attachTaskHistoryButtons()};
-
-if(typeof renderArchivedTasks==="function"){
-  const activityBaseRenderArchivedTasks=renderArchivedTasks;
-  renderArchivedTasks=function(){activityBaseRenderArchivedTasks();attachArchivedHistoryButtons()};
-}
-
+const activityBaseRenderTasks=renderTasks;renderTasks=function(){activityBaseRenderTasks();attachTaskHistoryButtons()};
+if(typeof renderArchivedTasks==="function"){const activityBaseRenderArchivedTasks=renderArchivedTasks;renderArchivedTasks=function(){activityBaseRenderArchivedTasks();attachArchivedHistoryButtons()}}
 [taskSearch,taskStatusFilter,taskPriorityFilter,taskDeadlineFilter].forEach(el=>el.addEventListener(el===taskSearch?"input":"change",()=>setTimeout(attachTaskHistoryButtons,0)));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&typeof taskHistoryModal!=="undefined"&&!taskHistoryModal.classList.contains("hidden"))closeTaskHistory()});
-
 renderTasks();
 
 /* Quick Add */
 function installQuickAdd(){
   if(document.getElementById("quickAddModal"))return;
   const style=document.createElement("style");
-  style.textContent=`.quick-add-launch{position:fixed;right:24px;bottom:72px;z-index:1200;display:flex;align-items:center;gap:8px;padding:11px 14px;border:1px solid #4a6680;border-radius:999px;background:#263b50;color:#edf3f8;box-shadow:0 10px 28px rgba(0,0,0,.28);font-weight:800;cursor:pointer}.quick-add-launch:hover{transform:translateY(-1px);background:#2c455e}.quick-add-launch kbd,.quick-add-hint kbd{padding:2px 6px;border:1px solid #536b82;border-radius:6px;background:#172433;color:#aebdcb;font:inherit;font-size:11px}.quick-add-card{width:min(620px,100%)}.quick-add-title{margin-bottom:13px}.quick-add-title input{font-size:17px;font-weight:700}.quick-add-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.quick-add-hint{margin-top:12px;color:#8799aa;font-size:12px}.quick-add-actions{margin-top:16px}.quick-add-status{min-height:18px;margin-top:8px;color:#f4939a;font-size:12px}@media(max-width:620px){.quick-add-launch{right:14px;bottom:64px}.quick-add-launch kbd{display:none}.quick-add-grid{grid-template-columns:1fr}}`;
+  style.textContent=`.quick-add-launch{position:static;display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #4a6680;border-radius:10px;background:#263b50;color:#edf3f8;box-shadow:none;font-weight:800;cursor:pointer;white-space:nowrap}.quick-add-launch:hover{background:#2c455e}.quick-add-launch kbd,.quick-add-hint kbd{padding:2px 6px;border:1px solid #536b82;border-radius:6px;background:#172433;color:#aebdcb;font:inherit;font-size:11px}.quick-add-card{width:min(620px,100%)}.quick-add-title{margin-bottom:13px}.quick-add-title input{font-size:17px;font-weight:700}.quick-add-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.quick-add-hint{margin-top:12px;color:#8799aa;font-size:12px}.quick-add-actions{margin-top:16px}.quick-add-status{min-height:18px;margin-top:8px;color:#f4939a;font-size:12px}@media(max-width:760px){.quick-add-launch span{font-size:0}.quick-add-launch span::after{content:"+";font-size:16px}.quick-add-launch kbd{display:none}}@media(max-width:620px){.quick-add-grid{grid-template-columns:1fr}}`;
   document.head.appendChild(style);
-
-  const launch=document.createElement("button");
-  launch.id="quickAddBtn";
-  launch.className="quick-add-launch";
-  launch.type="button";
-  launch.innerHTML=`<span>+ Quick Add</span><kbd>Q</kbd>`;
-  document.body.appendChild(launch);
-
-  const modal=document.createElement("div");
-  modal.id="quickAddModal";
-  modal.className="modal hidden";
-  modal.innerHTML=`<div class="modal-card quick-add-card"><div class="modal-header"><h2>Quick Add Task</h2><button id="closeQuickAddBtn" class="icon-btn" type="button">×</button></div><label class="quick-add-title">Title<input id="quickAddTitle" type="text" autocomplete="off" placeholder="What needs to be done?"></label><div class="quick-add-grid"><label>Priority<select id="quickAddPriority"><option>Low</option><option selected>Medium</option><option>High</option></select></label><label>Deadline<input id="quickAddDeadline" type="date"></label></div><label>Description<textarea id="quickAddDescription" rows="3" placeholder="Optional"></textarea></label><div class="quick-add-hint"><kbd>Enter</kbd> save · <kbd>Shift</kbd> + <kbd>Enter</kbd> new line in description · <kbd>Esc</kbd> close</div><div id="quickAddStatus" class="quick-add-status"></div><div class="actions end quick-add-actions"><button id="quickAddCancelBtn" class="btn secondary" type="button">Cancel</button><button id="quickAddSaveBtn" class="btn primary" type="button">Add Task</button></div></div>`;
-  document.body.appendChild(modal);
-
-  function openQuickAdd(){
-    if(!currentUser)return;
-    quickAddStatus.textContent="";
-    quickAddModal.classList.remove("hidden");
-    setTimeout(()=>quickAddTitle.focus(),0);
-  }
+  const launch=document.createElement("button");launch.id="quickAddBtn";launch.className="quick-add-launch";launch.type="button";launch.innerHTML=`<span>+ Quick Add</span><kbd>Q</kbd>`;
+  const headerActions=document.querySelector("#appView header .actions");
+  if(headerActions)headerActions.prepend(launch);else document.body.appendChild(launch);
+  const modal=document.createElement("div");modal.id="quickAddModal";modal.className="modal hidden";modal.innerHTML=`<div class="modal-card quick-add-card"><div class="modal-header"><h2>Quick Add Task</h2><button id="closeQuickAddBtn" class="icon-btn" type="button">×</button></div><label class="quick-add-title">Title<input id="quickAddTitle" type="text" autocomplete="off" placeholder="What needs to be done?"></label><div class="quick-add-grid"><label>Priority<select id="quickAddPriority"><option>Low</option><option selected>Medium</option><option>High</option></select></label><label>Deadline<input id="quickAddDeadline" type="date"></label></div><label>Description<textarea id="quickAddDescription" rows="3" placeholder="Optional"></textarea></label><div class="quick-add-hint"><kbd>Enter</kbd> save · <kbd>Shift</kbd> + <kbd>Enter</kbd> new line in description · <kbd>Esc</kbd> close</div><div id="quickAddStatus" class="quick-add-status"></div><div class="actions end quick-add-actions"><button id="quickAddCancelBtn" class="btn secondary" type="button">Cancel</button><button id="quickAddSaveBtn" class="btn primary" type="button">Add Task</button></div></div>`;document.body.appendChild(modal);
+  function openQuickAdd(){if(!currentUser)return;quickAddStatus.textContent="";quickAddModal.classList.remove("hidden");setTimeout(()=>quickAddTitle.focus(),0)}
   function closeQuickAdd(){quickAddModal.classList.add("hidden")}
-  async function saveQuickAdd(){
-    const title=quickAddTitle.value.trim();
-    if(!title){quickAddStatus.textContent="Please enter task title.";quickAddTitle.focus();return}
-    quickAddSaveBtn.disabled=true;
-    quickAddStatus.textContent="";
-    const{error}=await db.from("tasks").insert({user_id:currentUser.id,title,description:quickAddDescription.value.trim(),priority:quickAddPriority.value,status:"Todo",deadline:quickAddDeadline.value||null});
-    quickAddSaveBtn.disabled=false;
-    if(error){quickAddStatus.textContent=error.message;return}
-    quickAddTitle.value="";
-    quickAddDescription.value="";
-    quickAddPriority.value="Medium";
-    quickAddDeadline.value="";
-    closeQuickAdd();
-    await loadTasks();
-    if(typeof loadActivityHistory==="function"&&document.getElementById("activity-history")?.classList.contains("active"))loadActivityHistory();
-    toast("Task added.");
-  }
-
-  launch.onclick=openQuickAdd;
-  closeQuickAddBtn.onclick=closeQuickAdd;
-  quickAddCancelBtn.onclick=closeQuickAdd;
-  quickAddSaveBtn.onclick=saveQuickAdd;
-  quickAddModal.addEventListener("click",e=>{if(e.target===quickAddModal)closeQuickAdd()});
-  quickAddTitle.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveQuickAdd()}});
-  quickAddPriority.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveQuickAdd()}});
-  quickAddDeadline.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveQuickAdd()}});
-  document.addEventListener("keydown",e=>{
-    const tag=(document.activeElement?.tagName||"").toLowerCase();
-    const typing=["input","textarea","select"].includes(tag)||document.activeElement?.isContentEditable;
-    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){
-      e.preventDefault();
-      if(currentUser)openQuickAdd();
-      return;
-    }
-    if(!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.key.toLowerCase()==="q"){
-      e.preventDefault();
-      if(currentUser)openQuickAdd();
-    }
-    if(e.key==="Escape"&&!quickAddModal.classList.contains("hidden"))closeQuickAdd();
-  });
+  async function saveQuickAdd(){const title=quickAddTitle.value.trim();if(!title){quickAddStatus.textContent="Please enter task title.";quickAddTitle.focus();return}quickAddSaveBtn.disabled=true;quickAddStatus.textContent="";const{error}=await db.from("tasks").insert({user_id:currentUser.id,title,description:quickAddDescription.value.trim(),priority:quickAddPriority.value,status:"Todo",deadline:quickAddDeadline.value||null});quickAddSaveBtn.disabled=false;if(error){quickAddStatus.textContent=error.message;return}quickAddTitle.value="";quickAddDescription.value="";quickAddPriority.value="Medium";quickAddDeadline.value="";closeQuickAdd();await loadTasks();if(typeof loadActivityHistory==="function"&&document.getElementById("activity-history")?.classList.contains("active"))loadActivityHistory();toast("Task added.")}
+  launch.onclick=openQuickAdd;closeQuickAddBtn.onclick=closeQuickAdd;quickAddCancelBtn.onclick=closeQuickAdd;quickAddSaveBtn.onclick=saveQuickAdd;quickAddModal.addEventListener("click",e=>{if(e.target===quickAddModal)closeQuickAdd()});quickAddTitle.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveQuickAdd()}});quickAddPriority.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveQuickAdd()}});quickAddDeadline.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveQuickAdd()}});
+  document.addEventListener("keydown",e=>{const tag=(document.activeElement?.tagName||"").toLowerCase();const typing=["input","textarea","select"].includes(tag)||document.activeElement?.isContentEditable;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();if(currentUser)openQuickAdd();return}if(!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.key.toLowerCase()==="q"){e.preventDefault();if(currentUser)openQuickAdd()}if(e.key==="Escape"&&!quickAddModal.classList.contains("hidden"))closeQuickAdd()});
 }
-
 installQuickAdd();
