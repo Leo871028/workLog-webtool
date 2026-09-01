@@ -26,9 +26,9 @@
 
   <div id="appView" class="app hidden">
     <header><div class="app-title"><img class="app-title-icon" src="favicon.svg?v=20260831-1" alt=""><h1>Work Task Tracker</h1></div><div class="actions"><div class="animal-control"><select id="animalPicker" class="animal-picker" aria-label="Choose runner animal"><option value="dino">🦖 Dino</option><option value="cat">🐈 Cat</option><option value="dog">🐕 Dog</option><option value="rabbit">🐇 Rabbit</option><option value="fox">🦊 Fox</option><option value="turtle">🐢 Turtle</option></select><button id="dinoToggle" class="dino-toggle active" type="button" aria-pressed="true" title="Toggle runner"><span>Dino On</span></button></div><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
-    <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button><button class="tab" data-tab="export-log">Export</button><button class="tab" data-tab="backup-restore">Backup / Restore</button></nav>
+    <nav class="tabs"><button class="tab active" data-tab="dashboard">Dashboard</button><button class="tab" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button><button class="tab" data-tab="export-log">Export</button><button class="tab" data-tab="backup-restore">Backup / Restore</button></nav>
     <main>
-      <section id="tasks" class="page active">
+      <section id="dashboard" class="page active">
         <section class="dashboard" aria-label="Task dashboard">
           <div class="dashboard-summary">
             <div class="dashboard-card"><span class="dashboard-label">Open Tasks</span><strong id="dashboardTotal" class="dashboard-value">0</strong></div>
@@ -38,6 +38,8 @@
           </div>
           <div class="dashboard-deadlines"><h3>Upcoming Deadlines</h3><div id="upcomingDeadlines" class="upcoming-list"></div></div>
         </section>
+      </section>
+      <section id="tasks" class="page">
         <section class="card task-filter-card">
           <div class="task-filter-header"><h2>Search & Filter</h2><div class="task-filter-header-actions"><span id="taskFilterCount" class="task-filter-count">Showing 0 tasks</span><button id="archivedTasksBtn" class="btn secondary" type="button">Archived Tasks (0)</button></div></div>
           <div class="task-filter-grid">
