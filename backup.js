@@ -22,6 +22,8 @@ function safeTaskForBackup(t){
     deadline:t.deadline||null,
     archived:Boolean(t.archived),
     archived_at:t.archived_at||null,
+    pinned:Boolean(t.pinned),
+    pinned_at:t.pinned_at||null,
     created_at:t.created_at||null,
     updated_at:t.updated_at||null
   };
@@ -87,6 +89,7 @@ async function createFullBackup(){
 
 function validDateString(v){return typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)}
 function validUuid(v){return typeof v==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v)}
+function validDateTime(v){return typeof v==="string"&&!Number.isNaN(new Date(v).getTime())}
 
 function validateBackup(data){
   if(!data||typeof data!=="object")throw new Error("Invalid backup file.");
@@ -101,6 +104,8 @@ function validateBackup(data){
     if(!["Todo","Ongoing","Done"].includes(t.status))throw new Error(`Invalid task status at item ${i+1}.`);
     if(t.deadline!=null&&t.deadline!==""&&!validDateString(t.deadline))throw new Error(`Invalid task deadline at item ${i+1}.`);
     if(t.archived!=null&&typeof t.archived!=="boolean")throw new Error(`Invalid archive flag at task ${i+1}.`);
+    if(t.pinned!=null&&typeof t.pinned!=="boolean")throw new Error(`Invalid pin flag at task ${i+1}.`);
+    if(t.pinned_at!=null&&t.pinned_at!==""&&!validDateTime(t.pinned_at))throw new Error(`Invalid pinned time at task ${i+1}.`);
   });
   data.daily_logs.forEach((r,i)=>{
     if(!r||typeof r!=="object"||!validDateString(r.log_date))throw new Error(`Invalid Daily Work Log at item ${i+1}.`);
@@ -122,6 +127,8 @@ function taskRestoreRow(t){
     deadline:t.deadline||null,
     archived:Boolean(t.archived),
     archived_at:t.archived? (t.archived_at||new Date().toISOString()) : null,
+    pinned:Boolean(t.pinned),
+    pinned_at:t.pinned? (t.pinned_at||new Date().toISOString()) : null,
     updated_at:t.updated_at||new Date().toISOString()
   };
   if(validUuid(t.id))row.id=t.id;
