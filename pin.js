@@ -81,13 +81,33 @@ function decoratePinnedCards(){
   });
 }
 
+function decorateUpcomingDeadlinePins(){
+  if(typeof upcomingDeadlines==="undefined"||!upcomingDeadlines)return;
+  const upcoming=tasks.filter(t=>!t.archived&&t.status!=="Done"&&t.deadline&&deadlineDaysLeft(t.deadline)!==null)
+    .sort((a,b)=>taskDeadlineSortValue(a)-taskDeadlineSortValue(b))
+    .slice(0,5);
+  const items=[...upcomingDeadlines.querySelectorAll(".upcoming-item")];
+  items.forEach((item,index)=>{
+    const task=upcoming[index];
+    if(!task?.pinned)return;
+    const title=item.querySelector("strong");
+    if(title&&!title.querySelector(".dashboard-pin-mark")){
+      const mark=document.createElement("span");
+      mark.className="dashboard-pin-mark";
+      mark.textContent="📌";
+      mark.title="Pinned task";
+      title.prepend(mark);
+    }
+  });
+}
+
 const pinStyle=document.createElement("style");
-pinStyle.textContent=`.task-card.task-pinned{box-shadow:0 0 0 1px rgba(240,189,123,.34),0 8px 18px rgba(0,0,0,.14)}.task-card.task-pinned .task-title{display:flex;align-items:flex-start;gap:7px}.pin-mark{flex:0 0 auto;font-size:14px;line-height:1.25}.pin-btn{min-width:58px}`;
+pinStyle.textContent=`.task-card.task-pinned{box-shadow:0 0 0 1px rgba(240,189,123,.34),0 8px 18px rgba(0,0,0,.14)}.task-card.task-pinned .task-title{display:flex;align-items:flex-start;gap:7px}.pin-mark{flex:0 0 auto;font-size:14px;line-height:1.25}.pin-btn{min-width:58px}.dashboard-pin-mark{display:inline-block;margin-right:7px;font-size:13px;vertical-align:1px}`;
 document.head.appendChild(pinStyle);
 
 const pinBaseRenderTasks=renderTasks;
-renderTasks=function(){pinBaseRenderTasks();decoratePinnedCards()};
+renderTasks=function(){pinBaseRenderTasks();decoratePinnedCards();decorateUpcomingDeadlinePins()};
 
-[taskSearch,taskStatusFilter,taskPriorityFilter,taskDeadlineFilter].forEach(el=>el.addEventListener(el===taskSearch?"input":"change",()=>setTimeout(decoratePinnedCards,0)));
+[taskSearch,taskStatusFilter,taskPriorityFilter,taskDeadlineFilter].forEach(el=>el.addEventListener(el===taskSearch?"input":"change",()=>setTimeout(()=>{decoratePinnedCards();decorateUpcomingDeadlinePins()},0)));
 
 renderTasks();
