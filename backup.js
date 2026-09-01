@@ -39,28 +39,44 @@ function safeLogForBackup(r){
   };
 }
 
+function safeActivityForBackup(r){
+  return {
+    id:r.id,
+    task_id:r.task_id,
+    task_title:String(r.task_title||""),
+    event_type:String(r.event_type||""),
+    old_value:r.old_value??null,
+    new_value:r.new_value??null,
+    details:r.details&&typeof r.details==="object"?r.details:{},
+    created_at:r.created_at||null
+  };
+}
+
 async function createFullBackup(){
   if(!currentUser)return alert("Please sign in first.");
   backupBtn.disabled=true;
   const oldText=backupBtn.textContent;
   backupBtn.textContent="Creating Backup...";
   try{
-    const [taskResult,logResult]=await Promise.all([
+    const [taskResult,logResult,activityResult]=await Promise.all([
       db.from("tasks").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:true}),
-      db.from("daily_logs").select("*").eq("user_id",currentUser.id).order("log_date",{ascending:true})
+      db.from("daily_logs").select("*").eq("user_id",currentUser.id).order("log_date",{ascending:true}),
+      db.from("task_activity").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:true})
     ]);
     if(taskResult.error)throw taskResult.error;
     if(logResult.error)throw logResult.error;
+    const activityData=activityResult.error?[]:(activityResult.data||[]);
     const payload={
       app:"Work Task Tracker",
       backup_version:BACKUP_VERSION,
       exported_at:new Date().toISOString(),
-      counts:{tasks:(taskResult.data||[]).length,daily_logs:(logResult.data||[]).length},
+      counts:{tasks:(taskResult.data||[]).length,daily_logs:(logResult.data||[]).length,task_activity:activityData.length},
       tasks:(taskResult.data||[]).map(safeTaskForBackup),
-      daily_logs:(logResult.data||[]).map(safeLogForBackup)
+      daily_logs:(logResult.data||[]).map(safeLogForBackup),
+      task_activity:activityData.map(safeActivityForBackup)
     };
     backupDownload(JSON.stringify(payload,null,2),`work_task_tracker_backup_${todayString()}.json`);
-    toast(`Backup created: ${payload.counts.tasks} task${payload.counts.tasks===1?"":"s"}, ${payload.counts.daily_logs} log${payload.counts.daily_logs===1?"":"s"}.`);
+    toast(`Backup created: ${payload.counts.tasks} task${payload.counts.tasks===1?"":"s"}, ${payload.counts.daily_logs} log${payload.counts.daily_logs===1?"":"s"}, ${payload.counts.task_activity} history event${payload.counts.task_activity===1?"":"s"}.`);
   }catch(e){
     alert(e.message||String(e));
   }finally{
@@ -77,6 +93,7 @@ function validateBackup(data){
   if(data.app!=="Work Task Tracker")throw new Error("This file is not a Work Task Tracker backup.");
   if(Number(data.backup_version)!==BACKUP_VERSION)throw new Error(`Unsupported backup version: ${data.backup_version}.`);
   if(!Array.isArray(data.tasks)||!Array.isArray(data.daily_logs))throw new Error("Backup file is missing tasks or daily_logs.");
+  if(data.task_activity!=null&&!Array.isArray(data.task_activity))throw new Error("Invalid task_activity data in backup.");
   data.tasks.forEach((t,i)=>{
     if(!t||typeof t!=="object"||!String(t.title||"").trim())throw new Error(`Invalid task at item ${i+1}.`);
     if(t.id!=null&&!validUuid(t.id))throw new Error(`Invalid task ID at item ${i+1}.`);
@@ -87,6 +104,10 @@ function validateBackup(data){
   });
   data.daily_logs.forEach((r,i)=>{
     if(!r||typeof r!=="object"||!validDateString(r.log_date))throw new Error(`Invalid Daily Work Log at item ${i+1}.`);
+  });
+  (data.task_activity||[]).forEach((r,i)=>{
+    if(!r||typeof r!=="object"||!validUuid(r.task_id)||!String(r.event_type||"").trim())throw new Error(`Invalid Activity History at item ${i+1}.`);
+    if(r.id!=null&&!validUuid(r.id))throw new Error(`Invalid Activity History ID at item ${i+1}.`);
   });
   return data;
 }
@@ -122,6 +143,21 @@ function logRestoreRow(r){
   return row;
 }
 
+function activityRestoreRow(r){
+  const row={
+    user_id:currentUser.id,
+    task_id:r.task_id,
+    task_title:String(r.task_title||""),
+    event_type:String(r.event_type||"activity"),
+    old_value:r.old_value??null,
+    new_value:r.new_value??null,
+    details:r.details&&typeof r.details==="object"?r.details:{},
+    created_at:r.created_at||new Date().toISOString()
+  };
+  if(validUuid(r.id))row.id=r.id;
+  return row;
+}
+
 async function restoreBackupFile(){
   if(!currentUser)return alert("Please sign in first.");
   const file=restoreFile.files?.[0];
@@ -132,10 +168,11 @@ async function restoreBackupFile(){
   }catch(e){
     return alert(e.message||"Invalid backup file.");
   }
+  const activity=data.task_activity||[];
   const mode=restoreMode.value;
   const replace=mode==="replace";
-  const action=replace?"REPLACE all current Tasks and Daily Work Logs":"MERGE this backup into your current data";
-  if(!confirm(`Restore ${data.tasks.length} task(s) and ${data.daily_logs.length} Daily Work Log(s)?\n\nMode: ${replace?"Replace All":"Merge"}\n\nThis will ${action}.`))return;
+  const action=replace?"REPLACE all current Tasks, Daily Work Logs, and Activity History":"MERGE this backup into your current data";
+  if(!confirm(`Restore ${data.tasks.length} task(s), ${data.daily_logs.length} Daily Work Log(s), and ${activity.length} history event(s)?\n\nMode: ${replace?"Replace All":"Merge"}\n\nThis will ${action}.`))return;
 
   restoreBtn.disabled=true;
   backupBtn.disabled=true;
@@ -147,6 +184,8 @@ async function restoreBackupFile(){
       if(taskDelete.error)throw taskDelete.error;
       const logDelete=await db.from("daily_logs").delete().eq("user_id",currentUser.id);
       if(logDelete.error)throw logDelete.error;
+      const activityDelete=await db.from("task_activity").delete().eq("user_id",currentUser.id);
+      if(activityDelete.error&&activity.length)throw activityDelete.error;
     }
 
     if(data.tasks.length){
@@ -159,11 +198,21 @@ async function restoreBackupFile(){
       const result=await db.from("daily_logs").upsert(rows,{onConflict:"user_id,log_date"});
       if(result.error)throw result.error;
     }
+    if(activity.length){
+      if(replace){
+        const clearGenerated=await db.from("task_activity").delete().eq("user_id",currentUser.id);
+        if(clearGenerated.error)throw clearGenerated.error;
+      }
+      const rows=activity.map(activityRestoreRow);
+      const result=await db.from("task_activity").upsert(rows,{onConflict:"id"});
+      if(result.error)throw result.error;
+    }
 
     await Promise.all([loadTasks(),loadLogs()]);
+    if(typeof loadActivityHistory==="function"&&document.getElementById("activity-history")?.classList.contains("active"))await loadActivityHistory();
     restoreFile.value="";
     restoreFileName.textContent="No file selected";
-    toast(`Restore complete: ${data.tasks.length} task${data.tasks.length===1?"":"s"}, ${data.daily_logs.length} log${data.daily_logs.length===1?"":"s"}.`);
+    toast(`Restore complete: ${data.tasks.length} task${data.tasks.length===1?"":"s"}, ${data.daily_logs.length} log${data.daily_logs.length===1?"":"s"}, ${activity.length} history event${activity.length===1?"":"s"}.`);
   }catch(e){
     alert(`Restore failed: ${e.message||String(e)}`);
   }finally{
