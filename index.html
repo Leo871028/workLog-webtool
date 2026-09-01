@@ -9,7 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    .dashboard{display:grid;gap:14px;margin-bottom:18px}.dashboard-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.dashboard-card{padding:16px 18px;border:1px solid #3b5064;border-radius:16px;background:linear-gradient(180deg,#213346 0%,#1b2a39 100%);box-shadow:0 7px 18px rgba(0,0,0,.12)}.dashboard-label{display:block;color:#9fb0c0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.dashboard-value{display:block;margin-top:7px;color:#f4f7fb;font-size:29px;font-weight:800;line-height:1}.dashboard-card.overdue .dashboard-value{color:#f4939a}.dashboard-card.due-soon .dashboard-value{color:#f0bd7b}.dashboard-card.ongoing .dashboard-value{color:#94c5ff}.dashboard-deadlines{padding:16px 18px;border:1px solid #3b5064;border-radius:16px;background:#1b2a39}.dashboard-deadlines h3{margin:0 0 10px;font-size:15px;color:#e9f0f6}.upcoming-list{display:grid;gap:7px}.upcoming-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 11px;border-radius:12px;background:#213244;border:1px solid rgba(67,90,112,.58)}.upcoming-item>div{display:grid;gap:3px;min-width:0}.upcoming-item strong{overflow-wrap:anywhere;color:#edf3f8}.upcoming-item span{font-size:12px;color:#9fb0c0}.upcoming-date{white-space:nowrap;font-weight:800!important;color:#b9c7d4!important}.upcoming-date.due-soon{color:#f0bd7b!important}.upcoming-date.overdue{color:#f4939a!important}.dashboard-empty{padding:10px;color:#899bab;font-size:13px}.task-filter-card{margin-bottom:18px;padding:16px 18px}.task-filter-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.task-filter-header h2{margin:0;font-size:17px}.task-filter-count{font-size:12px;color:#9fb0c0;font-weight:700}.task-filter-grid{display:grid;grid-template-columns:minmax(220px,1.8fr) repeat(3,minmax(130px,.7fr)) auto;gap:10px;align-items:end}.task-filter-grid label{font-size:12px}.task-filter-grid .btn{white-space:nowrap}@media(max-width:900px){.dashboard-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.task-filter-grid{grid-template-columns:1fr 1fr}.task-filter-grid label:first-child{grid-column:1/-1}.task-filter-grid .btn{width:100%}.upcoming-item{align-items:flex-start;flex-direction:column}.upcoming-date{white-space:normal}}@media(max-width:560px){.dashboard-summary{grid-template-columns:1fr 1fr}.task-filter-grid{grid-template-columns:1fr}.task-filter-grid label:first-child{grid-column:auto}}
+    .dashboard{display:grid;gap:14px;margin-bottom:18px}.dashboard-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.dashboard-card{padding:16px 18px;border:1px solid #3b5064;border-radius:16px;background:linear-gradient(180deg,#213346 0%,#1b2a39 100%);box-shadow:0 7px 18px rgba(0,0,0,.12)}.dashboard-label{display:block;color:#9fb0c0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.dashboard-value{display:block;margin-top:7px;color:#f4f7fb;font-size:29px;font-weight:800;line-height:1}.dashboard-card.overdue .dashboard-value{color:#f4939a}.dashboard-card.due-soon .dashboard-value{color:#f0bd7b}.dashboard-card.ongoing .dashboard-value{color:#94c5ff}.dashboard-deadlines{padding:16px 18px;border:1px solid #3b5064;border-radius:16px;background:#1b2a39}.dashboard-deadlines h3{margin:0 0 10px;font-size:15px;color:#e9f0f6}.upcoming-list{display:grid;gap:7px}.upcoming-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 11px;border-radius:12px;background:#213244;border:1px solid rgba(67,90,112,.58)}.upcoming-item>div{display:grid;gap:3px;min-width:0}.upcoming-item strong{overflow-wrap:anywhere;color:#edf3f8}.upcoming-item span{font-size:12px;color:#9fb0c0}.upcoming-date{white-space:nowrap;font-weight:800!important;color:#b9c7d4!important}.upcoming-date.due-soon{color:#f0bd7b!important}.upcoming-date.overdue{color:#f4939a!important}.dashboard-empty{padding:10px;color:#899bab;font-size:13px}.task-filter-card{margin-bottom:18px;padding:16px 18px}.task-filter-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.task-filter-header h2{margin:0;font-size:17px}.task-filter-count{font-size:12px;color:#9fb0c0;font-weight:700}.task-filter-grid{display:grid;grid-template-columns:minmax(220px,1.8fr) repeat(3,minmax(130px,.7fr)) auto;gap:10px;align-items:end}.task-filter-grid label{font-size:12px}.task-filter-grid .btn{white-space:nowrap}.backup-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.backup-card{padding:22px}.backup-card p{margin:0 0 16px;color:#9fb0c0;line-height:1.6}.backup-actions{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.backup-actions label{min-width:180px;flex:1}.file-picker{display:grid;gap:8px}.file-picker input[type=file]{padding:9px}.restore-file-name{font-size:12px;color:#8fa1b2;overflow-wrap:anywhere}.backup-warning{margin-top:14px;padding:12px 14px;border:1px solid rgba(240,189,123,.28);border-radius:12px;background:rgba(204,148,78,.10);color:#e6bd85;font-size:13px;line-height:1.5}@media(max-width:900px){.dashboard-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.task-filter-grid{grid-template-columns:1fr 1fr}.task-filter-grid label:first-child{grid-column:1/-1}.task-filter-grid .btn{width:100%}.upcoming-item{align-items:flex-start;flex-direction:column}.upcoming-date{white-space:normal}.backup-grid{grid-template-columns:1fr}}@media(max-width:560px){.dashboard-summary{grid-template-columns:1fr 1fr}.task-filter-grid{grid-template-columns:1fr}.task-filter-grid label:first-child{grid-column:auto}}
   </style>
 </head>
 <body>
@@ -26,7 +26,7 @@
 
   <div id="appView" class="app hidden">
     <header><div class="app-title"><img class="app-title-icon" src="favicon.svg?v=20260831-1" alt=""><h1>Work Task Tracker</h1></div><div class="actions"><div class="animal-control"><select id="animalPicker" class="animal-picker" aria-label="Choose runner animal"><option value="dino">🦖 Dino</option><option value="cat">🐈 Cat</option><option value="dog">🐕 Dog</option><option value="rabbit">🐇 Rabbit</option><option value="fox">🦊 Fox</option><option value="turtle">🐢 Turtle</option></select><button id="dinoToggle" class="dino-toggle active" type="button" aria-pressed="true" title="Toggle runner"><span>Dino On</span></button></div><span id="userEmail" class="chip"></span><button id="logoutBtn" class="btn secondary">Sign Out</button></div></header>
-    <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button><button class="tab" data-tab="export-log">Export</button></nav>
+    <nav class="tabs"><button class="tab active" data-tab="tasks">Tasks</button><button class="tab" data-tab="daily-log">Daily Work Log</button><button class="tab" data-tab="export-log">Export</button><button class="tab" data-tab="backup-restore">Backup / Restore</button></nav>
     <main>
       <section id="tasks" class="page active">
         <section class="dashboard" aria-label="Task dashboard">
@@ -36,12 +36,8 @@
             <div class="dashboard-card overdue"><span class="dashboard-label">Overdue</span><strong id="dashboardOverdue" class="dashboard-value">0</strong></div>
             <div class="dashboard-card due-soon"><span class="dashboard-label">Due Soon</span><strong id="dashboardDueSoon" class="dashboard-value">0</strong></div>
           </div>
-          <div class="dashboard-deadlines">
-            <h3>Upcoming Deadlines</h3>
-            <div id="upcomingDeadlines" class="upcoming-list"></div>
-          </div>
+          <div class="dashboard-deadlines"><h3>Upcoming Deadlines</h3><div id="upcomingDeadlines" class="upcoming-list"></div></div>
         </section>
-
         <section class="card task-filter-card">
           <div class="task-filter-header"><h2>Search & Filter</h2><span id="taskFilterCount" class="task-filter-count">Showing 0 tasks</span></div>
           <div class="task-filter-grid">
@@ -52,48 +48,19 @@
             <button id="clearTaskFiltersBtn" class="btn secondary" type="button">Clear Filters</button>
           </div>
         </section>
-
-        <section class="card new-task-card">
-          <h2>New Task</h2>
-          <div class="form-grid">
-            <label>Title<input id="taskTitle" type="text"></label>
-            <label>Priority<select id="taskPriority"><option>Low</option><option selected>Medium</option><option>High</option></select></label>
-            <label>Deadline<input id="taskDeadline" type="date"></label>
-            <button id="addTaskBtn" class="btn primary">Add Task</button>
-          </div>
-          <label>Description<textarea id="taskDesc" rows="3"></textarea></label>
-        </section>
-        <section class="board">
-          <div class="panel"><h3 class="todo">Todo</h3><div id="todoList" class="task-list"></div></div>
-          <div class="panel"><h3 class="ongoing">Ongoing</h3><div id="ongoingList" class="task-list"></div></div>
-          <div class="panel"><h3 class="done">Done</h3><div id="doneList" class="task-list"></div></div>
-        </section>
+        <section class="card new-task-card"><h2>New Task</h2><div class="form-grid"><label>Title<input id="taskTitle" type="text"></label><label>Priority<select id="taskPriority"><option>Low</option><option selected>Medium</option><option>High</option></select></label><label>Deadline<input id="taskDeadline" type="date"></label><button id="addTaskBtn" class="btn primary">Add Task</button></div><label>Description<textarea id="taskDesc" rows="3"></textarea></label></section>
+        <section class="board"><div class="panel"><h3 class="todo">Todo</h3><div id="todoList" class="task-list"></div></div><div class="panel"><h3 class="ongoing">Ongoing</h3><div id="ongoingList" class="task-list"></div></div><div class="panel"><h3 class="done">Done</h3><div id="doneList" class="task-list"></div></div></section>
       </section>
       <section id="daily-log" class="page">
-        <section class="card log-toolbar">
-          <h2>Daily Work Log</h2>
-          <div class="log-controls">
-            <div class="log-nav"><button id="prevDayBtn" class="btn secondary">Prev Day</button><button id="todayBtn" class="btn secondary">Today</button><button id="nextDayBtn" class="btn secondary">Next Day</button></div>
-            <div class="log-save-group"><label>Date<input id="logDate" type="date"></label><div class="save-button-wrap"><button id="saveLogBtn" class="btn success">Save Log</button><span id="saveStatus" class="save-status hidden"></span></div></div>
-          </div>
-        </section>
-        <section class="log-grid">
-          <label class="log-card">Completed Today<textarea id="completed" rows="10"></textarea></label>
-          <label class="log-card">Ongoing / In Progress<textarea id="ongoing" rows="10"></textarea></label>
-          <label class="log-card">Blockers / Issues<textarea id="blockers" rows="10"></textarea></label>
-          <label class="log-card">Next Plan<textarea id="nextPlan" rows="10"></textarea></label>
-        </section>
+        <section class="card log-toolbar"><h2>Daily Work Log</h2><div class="log-controls"><div class="log-nav"><button id="prevDayBtn" class="btn secondary">Prev Day</button><button id="todayBtn" class="btn secondary">Today</button><button id="nextDayBtn" class="btn secondary">Next Day</button></div><div class="log-save-group"><label>Date<input id="logDate" type="date"></label><div class="save-button-wrap"><button id="saveLogBtn" class="btn success">Save Log</button><span id="saveStatus" class="save-status hidden"></span></div></div></div></section>
+        <section class="log-grid"><label class="log-card">Completed Today<textarea id="completed" rows="10"></textarea></label><label class="log-card">Ongoing / In Progress<textarea id="ongoing" rows="10"></textarea></label><label class="log-card">Blockers / Issues<textarea id="blockers" rows="10"></textarea></label><label class="log-card">Next Plan<textarea id="nextPlan" rows="10"></textarea></label></section>
       </section>
-      <section id="export-log" class="page">
-        <section class="card log-export-card">
-          <div class="log-export-heading"><div><h2>Export Daily Work Log</h2><p>Export saved logs within a selected date range.</p></div></div>
-          <div class="log-export-controls">
-            <label>From<input id="exportStartDate" type="date"></label>
-            <label>To<input id="exportEndDate" type="date"></label>
-            <label>Format<select id="exportFormat"><option value="xlsx" selected>Excel (.xlsx)</option><option value="csv">CSV (.csv)</option><option value="md">Markdown (.md)</option><option value="txt">Text (.txt)</option></select></label>
-            <button id="exportLogsBtn" class="btn primary" type="button">Export</button>
-          </div>
-        </section>
+      <section id="export-log" class="page"><section class="card log-export-card"><div class="log-export-heading"><div><h2>Export Daily Work Log</h2><p>Export saved logs within a selected date range.</p></div></div><div class="log-export-controls"><label>From<input id="exportStartDate" type="date"></label><label>To<input id="exportEndDate" type="date"></label><label>Format<select id="exportFormat"><option value="xlsx" selected>Excel (.xlsx)</option><option value="csv">CSV (.csv)</option><option value="md">Markdown (.md)</option><option value="txt">Text (.txt)</option></select></label><button id="exportLogsBtn" class="btn primary" type="button">Export</button></div></section></section>
+      <section id="backup-restore" class="page">
+        <div class="backup-grid">
+          <section class="card backup-card"><h2>Backup Account Data</h2><p>Download a JSON backup containing all Tasks and saved Daily Work Logs for the currently signed-in account.</p><div class="backup-actions"><button id="backupBtn" class="btn primary" type="button">Download Backup</button></div><div class="backup-warning">Keep this file private. It can contain your task descriptions and Daily Work Log text.</div></section>
+          <section class="card backup-card"><h2>Restore / Import Backup</h2><p>Import a Work Task Tracker JSON backup into the currently signed-in account.</p><div class="file-picker"><label>Backup File<input id="restoreFile" type="file" accept="application/json,.json"></label><span id="restoreFileName" class="restore-file-name">No file selected</span></div><div class="backup-actions"><label>Restore Mode<select id="restoreMode"><option value="merge" selected>Merge with current data</option><option value="replace">Replace all current data</option></select></label><button id="restoreBtn" class="btn success" type="button">Restore Backup</button></div><div class="backup-warning"><strong>Merge:</strong> existing Tasks with the same ID are updated and Daily Logs with the same date are overwritten. <strong>Replace All:</strong> current Tasks and Daily Logs are deleted before restore.</div></section>
+        </div>
       </section>
     </main>
   </div>
@@ -103,6 +70,7 @@
 
   <script src="config.js"></script>
   <script src="app.js?v=20260901-3"></script>
+  <script src="backup.js?v=20260901-1"></script>
   <script src="dino.js?v=20260831-4"></script>
 </body>
 </html>
