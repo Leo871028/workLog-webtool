@@ -170,3 +170,74 @@ if(typeof renderArchivedTasks==="function"){
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&typeof taskHistoryModal!=="undefined"&&!taskHistoryModal.classList.contains("hidden"))closeTaskHistory()});
 
 renderTasks();
+
+/* Quick Add */
+function installQuickAdd(){
+  if(document.getElementById("quickAddModal"))return;
+  const style=document.createElement("style");
+  style.textContent=`.quick-add-launch{position:fixed;right:24px;bottom:72px;z-index:1200;display:flex;align-items:center;gap:8px;padding:11px 14px;border:1px solid #4a6680;border-radius:999px;background:#263b50;color:#edf3f8;box-shadow:0 10px 28px rgba(0,0,0,.28);font-weight:800;cursor:pointer}.quick-add-launch:hover{transform:translateY(-1px);background:#2c455e}.quick-add-launch kbd,.quick-add-hint kbd{padding:2px 6px;border:1px solid #536b82;border-radius:6px;background:#172433;color:#aebdcb;font:inherit;font-size:11px}.quick-add-card{width:min(620px,100%)}.quick-add-title{margin-bottom:13px}.quick-add-title input{font-size:17px;font-weight:700}.quick-add-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.quick-add-hint{margin-top:12px;color:#8799aa;font-size:12px}.quick-add-actions{margin-top:16px}.quick-add-status{min-height:18px;margin-top:8px;color:#f4939a;font-size:12px}@media(max-width:620px){.quick-add-launch{right:14px;bottom:64px}.quick-add-launch kbd{display:none}.quick-add-grid{grid-template-columns:1fr}}`;
+  document.head.appendChild(style);
+
+  const launch=document.createElement("button");
+  launch.id="quickAddBtn";
+  launch.className="quick-add-launch";
+  launch.type="button";
+  launch.innerHTML=`<span>+ Quick Add</span><kbd>Q</kbd>`;
+  document.body.appendChild(launch);
+
+  const modal=document.createElement("div");
+  modal.id="quickAddModal";
+  modal.className="modal hidden";
+  modal.innerHTML=`<div class="modal-card quick-add-card"><div class="modal-header"><h2>Quick Add Task</h2><button id="closeQuickAddBtn" class="icon-btn" type="button">×</button></div><label class="quick-add-title">Title<input id="quickAddTitle" type="text" autocomplete="off" placeholder="What needs to be done?"></label><div class="quick-add-grid"><label>Priority<select id="quickAddPriority"><option>Low</option><option selected>Medium</option><option>High</option></select></label><label>Deadline<input id="quickAddDeadline" type="date"></label></div><label>Description<textarea id="quickAddDescription" rows="3" placeholder="Optional"></textarea></label><div class="quick-add-hint"><kbd>Enter</kbd> save · <kbd>Shift</kbd> + <kbd>Enter</kbd> new line in description · <kbd>Esc</kbd> close</div><div id="quickAddStatus" class="quick-add-status"></div><div class="actions end quick-add-actions"><button id="quickAddCancelBtn" class="btn secondary" type="button">Cancel</button><button id="quickAddSaveBtn" class="btn primary" type="button">Add Task</button></div></div>`;
+  document.body.appendChild(modal);
+
+  function openQuickAdd(){
+    if(!currentUser)return;
+    quickAddStatus.textContent="";
+    quickAddModal.classList.remove("hidden");
+    setTimeout(()=>quickAddTitle.focus(),0);
+  }
+  function closeQuickAdd(){quickAddModal.classList.add("hidden")}
+  async function saveQuickAdd(){
+    const title=quickAddTitle.value.trim();
+    if(!title){quickAddStatus.textContent="Please enter task title.";quickAddTitle.focus();return}
+    quickAddSaveBtn.disabled=true;
+    quickAddStatus.textContent="";
+    const{error}=await db.from("tasks").insert({user_id:currentUser.id,title,description:quickAddDescription.value.trim(),priority:quickAddPriority.value,status:"Todo",deadline:quickAddDeadline.value||null});
+    quickAddSaveBtn.disabled=false;
+    if(error){quickAddStatus.textContent=error.message;return}
+    quickAddTitle.value="";
+    quickAddDescription.value="";
+    quickAddPriority.value="Medium";
+    quickAddDeadline.value="";
+    closeQuickAdd();
+    await loadTasks();
+    if(typeof loadActivityHistory==="function"&&document.getElementById("activity-history")?.classList.contains("active"))loadActivityHistory();
+    toast("Task added.");
+  }
+
+  launch.onclick=openQuickAdd;
+  closeQuickAddBtn.onclick=closeQuickAdd;
+  quickAddCancelBtn.onclick=closeQuickAdd;
+  quickAddSaveBtn.onclick=saveQuickAdd;
+  quickAddModal.addEventListener("click",e=>{if(e.target===quickAddModal)closeQuickAdd()});
+  quickAddTitle.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveQuickAdd()}});
+  quickAddPriority.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveQuickAdd()}});
+  quickAddDeadline.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveQuickAdd()}});
+  document.addEventListener("keydown",e=>{
+    const tag=(document.activeElement?.tagName||"").toLowerCase();
+    const typing=["input","textarea","select"].includes(tag)||document.activeElement?.isContentEditable;
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){
+      e.preventDefault();
+      if(currentUser)openQuickAdd();
+      return;
+    }
+    if(!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.key.toLowerCase()==="q"){
+      e.preventDefault();
+      if(currentUser)openQuickAdd();
+    }
+    if(e.key==="Escape"&&!quickAddModal.classList.contains("hidden"))closeQuickAdd();
+  });
+}
+
+installQuickAdd();
