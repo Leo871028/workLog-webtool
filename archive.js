@@ -1,9 +1,14 @@
 const baseGetFilteredTasks=getFilteredTasks;
-const baseRenderDashboard=renderDashboard;
 const baseRenderTasks=renderTasks;
 
 getFilteredTasks=function(){
   return baseGetFilteredTasks().filter(t=>!t.archived);
+};
+
+updateFilterResultCount=function(filtered){
+  if(typeof taskFilterCount==="undefined")return;
+  const activeCount=tasks.filter(t=>!t.archived).length;
+  taskFilterCount.textContent=`Showing ${filtered.length} of ${activeCount} task${activeCount===1?"":"s"}`;
 };
 
 renderDashboard=function(){
@@ -84,6 +89,7 @@ if(typeof archivedTasksBtn!=="undefined")archivedTasksBtn.onclick=openArchiveMod
 if(typeof closeArchiveModalBtn!=="undefined")closeArchiveModalBtn.onclick=closeArchiveModal;
 if(typeof archivedTaskSearch!=="undefined")archivedTaskSearch.addEventListener("input",renderArchivedTasks);
 if(typeof archiveModal!=="undefined")archiveModal.addEventListener("click",e=>{if(e.target===archiveModal)closeArchiveModal()});
+[taskSearch,taskStatusFilter,taskPriorityFilter,taskDeadlineFilter].forEach(el=>el.addEventListener(el===taskSearch?"input":"change",renderTasks));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&typeof archiveModal!=="undefined"&&!archiveModal.classList.contains("hidden"))closeArchiveModal()});
 
 renderTasks();
