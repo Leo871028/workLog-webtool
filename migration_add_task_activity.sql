@@ -1,3 +1,8 @@
+create extension if not exists pgcrypto;
+
+alter table public.tasks add column if not exists archived boolean not null default false;
+alter table public.tasks add column if not exists archived_at timestamptz;
+
 create table if not exists public.task_activity (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
