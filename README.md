@@ -71,6 +71,20 @@ Export saved work logs over a selected date range as:
 - Markdown (`.md`)
 - Text (`.txt`)
 
+The existing browser Export page remains fully client-side and unchanged.
+
+An additional authenticated **Supabase Edge Function API** is available for external tools and automation. It supports:
+
+- Excel (`xlsx`)
+- CSV (`csv`)
+- Markdown (`md`)
+- Text (`txt`)
+- JSON (`json`)
+
+API source and deployment instructions:
+
+`supabase/functions/export-log/`
+
 ### Calendar View
 
 - Monthly task calendar based on deadlines
@@ -129,16 +143,23 @@ Keyboard shortcuts:
 ## Architecture
 
 ```text
-GitHub Pages
-     │
-     ▼
-HTML / CSS / JavaScript
-     │
-     ▼
-Supabase
-├── Authentication
-├── PostgreSQL
-└── Row Level Security (RLS)
+                     ┌─────────────────────────────┐
+                     │        GitHub Pages         │
+                     │   HTML / CSS / JavaScript   │
+                     └──────────────┬──────────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │      Supabase       │
+                         │ Auth / PostgreSQL   │
+                         │        RLS          │
+                         └──────────┬──────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    │                               │
+                    ▼                               ▼
+          Browser Export Page            Export Edge Function API
+          XLSX / CSV / MD / TXT          XLSX / CSV / MD / TXT / JSON
 ```
 
 The application does not require a dedicated backend server. Static frontend files are hosted by GitHub Pages while authentication and persistent data are handled by Supabase.
@@ -149,7 +170,7 @@ The application does not require a dedicated backend server. Static frontend fil
 | --- | --- |
 | `index.html` | Main application UI |
 | `style.css` | Global styling and responsive layout |
-| `app.js` | Core tasks, dashboard, Daily Work Log, and export logic |
+| `app.js` | Core tasks, dashboard, Daily Work Log, and browser export logic |
 | `config.js` | Supabase project configuration |
 | `backup.js` | JSON backup and restore |
 | `archive.js` | Task archive / restore functionality |
@@ -158,6 +179,46 @@ The application does not require a dedicated backend server. Static frontend fil
 | `activity.js` | Activity History and Quick Add |
 | `dino.js` | Interactive animal runner |
 | `schema.sql` | Supabase database schema and RLS policies |
+| `supabase/functions/export-log/index.ts` | Authenticated Daily Work Log export API |
+
+## Daily Work Log Export API
+
+The API is implemented as a Supabase Edge Function and does **not** replace or modify the existing web Export page.
+
+Endpoint after deployment:
+
+```text
+GET https://<PROJECT_REF>.supabase.co/functions/v1/export-log
+```
+
+Parameters:
+
+```text
+start=YYYY-MM-DD
+end=YYYY-MM-DD
+format=xlsx|csv|md|txt|json
+```
+
+Authentication:
+
+```http
+Authorization: Bearer <SUPABASE_USER_ACCESS_TOKEN>
+```
+
+Example:
+
+```bash
+curl -L \
+  "https://<PROJECT_REF>.supabase.co/functions/v1/export-log?start=2026-09-01&end=2026-09-30&format=csv" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -o daily_work_log.csv
+```
+
+The API validates the Supabase user session and queries only the authenticated user's `daily_logs`. Existing Row Level Security policies continue to apply.
+
+Deployment and usage details are documented in:
+
+`supabase/functions/export-log/README.md`
 
 ## Database
 
@@ -238,9 +299,21 @@ The current deployment is:
 https://leo871028.github.io/workLog-webtool/
 ```
 
+### 6. Deploy the optional Export API
+
+Using the Supabase CLI from the repository root:
+
+```bash
+supabase login
+supabase link --project-ref <PROJECT_REF>
+supabase functions deploy export-log
+```
+
+The web app works normally even if this Edge Function has not been deployed.
+
 ## Local Development
 
-No Node.js build step is required.
+No Node.js build step is required for the GitHub Pages frontend.
 
 Start a simple local web server:
 
@@ -259,8 +332,10 @@ http://localhost:8000
 - Authentication is handled by Supabase Auth.
 - Database access is protected by Row Level Security.
 - Each authenticated user only sees their own application data.
+- The Export API derives the user from the Supabase access token and does not accept a caller-supplied `user_id`.
 - Do not expose the Supabase `service_role` key.
 - JSON backups can contain task descriptions and Daily Work Log content; keep backup files private.
+- Export API access tokens expire; external integrations should use a proper Supabase Auth session / refresh-token flow.
 
 ## Tech Stack
 
@@ -270,5 +345,6 @@ http://localhost:8000
 - Supabase Auth
 - Supabase PostgreSQL
 - Supabase Row Level Security
+- Supabase Edge Functions
 - SheetJS for Excel export
 - GitHub Pages
