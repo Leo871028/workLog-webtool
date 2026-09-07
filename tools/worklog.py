@@ -3,7 +3,6 @@
 
 import argparse
 import json
-import os
 import sys
 from datetime import date, datetime
 from pathlib import Path
@@ -11,6 +10,11 @@ from pathlib import Path
 import requests
 
 API_URL = "https://dgztbxwkluufwtvhvcue.supabase.co/functions/v1/export-log"
+
+# Fill in the same API key configured as EXPORT_API_KEY in Supabase.
+# IMPORTANT: this repository is public. Do not commit your real API key to GitHub.
+API_KEY = "YOUR_API_KEY"
+
 FORMATS = ("json", "csv", "xlsx", "md", "txt")
 
 
@@ -30,17 +34,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--end", type=valid_date, help="End date (YYYY-MM-DD). Defaults to today")
     parser.add_argument("--format", choices=FORMATS, default="json", help="Export format (default: json)")
     parser.add_argument("--output", "-o", help="Output file or directory for non-JSON formats")
-    parser.add_argument(
-        "--api-key",
-        help="API key. Prefer the WORKLOG_API_KEY environment variable instead.",
-    )
     return parser
 
 
-def request_export(start: str, end: str, export_format: str, api_key: str) -> requests.Response:
+def request_export(start: str, end: str, export_format: str) -> requests.Response:
     response = requests.get(
         API_URL,
-        headers={"X-API-Key": api_key},
+        headers={"X-API-Key": API_KEY},
         params={"start": start, "end": end, "format": export_format},
         timeout=30,
     )
@@ -75,16 +75,12 @@ def main() -> int:
         print("Error: --start cannot be later than --end.", file=sys.stderr)
         return 2
 
-    api_key = args.api_key or os.getenv("WORKLOG_API_KEY")
-    if not api_key:
-        print(
-            "Error: API key not found. Set WORKLOG_API_KEY or pass --api-key.",
-            file=sys.stderr,
-        )
+    if not API_KEY or API_KEY == "YOUR_API_KEY":
+        print("Error: Set API_KEY at the top of tools/worklog.py first.", file=sys.stderr)
         return 2
 
     try:
-        response = request_export(args.start, end, args.format, api_key)
+        response = request_export(args.start, end, args.format)
     except requests.RequestException as exc:
         print(f"Network error: {exc}", file=sys.stderr)
         return 1
