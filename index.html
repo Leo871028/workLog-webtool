@@ -55,7 +55,8 @@
       </section>
       <section id="daily-log" class="page">
         <section class="card log-toolbar"><h2>Daily Work Log</h2><div class="log-controls"><div class="log-nav"><button id="prevDayBtn" class="btn secondary">Prev Day</button><button id="todayBtn" class="btn secondary">Today</button><button id="nextDayBtn" class="btn secondary">Next Day</button></div><div class="log-save-group"><label>Date<input id="logDate" type="date"></label><div class="save-button-wrap"><button id="saveLogBtn" class="btn success">Save Log</button><span id="saveStatus" class="save-status hidden"></span></div></div></div></section>
-        <section class="log-grid"><label class="log-card">Completed Today<textarea id="completed" rows="10"></textarea></label><label class="log-card">Ongoing / In Progress<textarea id="ongoing" rows="10"></textarea></label><label class="log-card">Blockers / Issues<textarea id="blockers" rows="10"></textarea></label><label class="log-card">Next Plan<textarea id="nextPlan" rows="10"></textarea></label></section>
+        <section class="log-grid"><label class="log-card">Completed Today<textarea id="completed" rows="10"></textarea></label><label class="log-card">Ongoing / In Progress<textarea id="ongoing" rows="10"></textarea></label></section>
+        <textarea id="blockers" class="hidden" aria-hidden="true" tabindex="-1"></textarea><textarea id="nextPlan" class="hidden" aria-hidden="true" tabindex="-1"></textarea>
       </section>
       <section id="export-log" class="page"><section class="card log-export-card"><div class="log-export-heading"><div><h2>Export Daily Work Log</h2><p>Export saved logs within a selected date range.</p></div></div><div class="log-export-controls"><label>From<input id="exportStartDate" type="date"></label><label>To<input id="exportEndDate" type="date"></label><label>Format<select id="exportFormat"><option value="xlsx" selected>Excel (.xlsx)</option><option value="csv">CSV (.csv)</option><option value="md">Markdown (.md)</option><option value="txt">Text (.txt)</option></select></label><button id="exportLogsBtn" class="btn primary" type="button">Export</button></div></section></section>
       <section id="backup-restore" class="page">
@@ -73,6 +74,7 @@
 
   <script src="config.js"></script>
   <script src="app.js?v=20260901-3"></script>
+  <script src="worklog-two-fields.js?v=20260907-1"></script>
   <script src="backup.js?v=20260901-4"></script>
   <script src="archive.js?v=20260901-1"></script>
   <script src="pin.js?v=20260901-3"></script>
