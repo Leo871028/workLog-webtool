@@ -20,7 +20,9 @@ OUTPUT_DIR = Path("weekly_worklogs")
 def last_complete_week() -> tuple[date, date]:
     today = date.today()
     this_monday = today - timedelta(days=today.weekday())
-    return this_monday - timedelta(days=7), this_monday - timedelta(days=1)
+    last_monday = this_monday - timedelta(days=7)
+    last_friday = last_monday + timedelta(days=4)
+    return last_monday, last_friday
 
 
 def fetch_week(start: date, end: date) -> dict:
