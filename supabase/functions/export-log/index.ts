@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import * as XLSX from "npm:xlsx@0.18.5";
 
 type LogRow={log_date:string;work_hours:number|null;completed:string|null;ongoing:string|null};
+type TaskRow={id:string;title:string;description:string|null;priority:string;status:string;deadline:string|null;updated_at:string};
 const corsHeaders={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-api-key, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET, OPTIONS"};
 function responseJson(body:unknown,status=200){return new Response(JSON.stringify(body,null,2),{status,headers:{...corsHeaders,"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store"}})}
 function isDate(value:string|null):value is string{if(!value||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const[y,m,d]=value.split("-").map(Number),x=new Date(Date.UTC(y,m-1,d));return x.getUTCFullYear()===y&&x.getUTCMonth()===m-1&&x.getUTCDate()===d}
@@ -21,14 +22,23 @@ Deno.serve(async req=>{
  if(!suppliedKey||!safeEqual(suppliedKey,expectedKey))return responseJson({error:"Invalid or missing X-API-Key."},401);
  const supabaseUrl=Deno.env.get("SUPABASE_URL"),serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),exportUserId=Deno.env.get("EXPORT_USER_ID");
  if(!supabaseUrl||!serviceKey||!exportUserId)return responseJson({error:"SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, or EXPORT_USER_ID is not configured."},500);
- const url=new URL(req.url),start=url.searchParams.get("start"),end=url.searchParams.get("end"),format=(url.searchParams.get("format")||"csv").toLowerCase();
+ const url=new URL(req.url),start=url.searchParams.get("start"),end=url.searchParams.get("end"),format=(url.searchParams.get("format")||"csv").toLowerCase(),includeTasks=url.searchParams.get("include_tasks")==="true";
  if(!isDate(start)||!isDate(end))return responseJson({error:"start and end must use YYYY-MM-DD format."},400);
  if(start>end)return responseJson({error:"start cannot be later than end."},400);
  if(!new Set(["xlsx","csv","md","txt","json"]).has(format))return responseJson({error:"format must be one of: xlsx, csv, md, txt, json."},400);
  const supabase=createClient(supabaseUrl,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
  const{data,error}=await supabase.from("daily_logs").select("log_date,work_hours,completed,ongoing").eq("user_id",exportUserId).gte("log_date",start).lte("log_date",end).order("log_date",{ascending:true});
  if(error)return responseJson({error:error.message},500);const logs=(data||[]) as LogRow[];if(!logs.length)return responseJson({error:"No saved Daily Work Logs were found in this date range."},404);
- if(format==="json")return responseJson({start,end,count:logs.length,logs});
+ if(format==="json"){
+   let tasks:{ongoing:TaskRow[];todo:TaskRow[]}|undefined;
+   if(includeTasks){
+     const{data:taskData,error:taskError}=await supabase.from("tasks").select("id,title,description,priority,status,deadline,updated_at").eq("user_id",exportUserId).eq("archived",false).in("status",["Todo","Ongoing"]).order("deadline",{ascending:true,nullsFirst:false}).order("priority",{ascending:true});
+     if(taskError)return responseJson({error:taskError.message},500);
+     const rows=(taskData||[]) as TaskRow[];
+     tasks={ongoing:rows.filter(t=>t.status==="Ongoing"),todo:rows.filter(t=>t.status==="Todo")};
+   }
+   return responseJson({start,end,count:logs.length,logs,...(tasks?{tasks}: {})});
+ }
  const base=`daily_work_log_${start}_to_${end}`;let body:BodyInit,contentType:string,extension=format;
  if(format==="xlsx"){body=logsToExcel(logs);contentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}else if(format==="md"){body=logsToMarkdown(logs,start,end);contentType="text/markdown; charset=utf-8"}else if(format==="txt"){body="\ufeff"+logsToText(logs,start,end);contentType="text/plain; charset=utf-8"}else{body=logsToCsv(logs);contentType="text/csv; charset=utf-8";extension="csv"}
  return new Response(body,{status:200,headers:{...corsHeaders,"Content-Type":contentType,"Content-Disposition":`attachment; filename="${base}.${extension}"`,"Cache-Control":"no-store","X-Export-Count":String(logs.length)}});
